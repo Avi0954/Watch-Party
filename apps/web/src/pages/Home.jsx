@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Play, Plus, ArrowRight, User, Ghost, Cat, Dog, Bot, Smile, Sparkles, Film, MessageSquare, Link as LinkIcon } from 'lucide-react';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AVATARS = [
   { id: 'ghost', icon: Ghost },

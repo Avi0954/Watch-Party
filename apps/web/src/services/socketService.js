@@ -27,7 +27,7 @@ class SocketService {
     }
 
     try {
-      this.socket = new WebSocket(`ws://localhost:8000/ws/${roomId}`);
+      this.socket = new WebSocket(`wss://watch-party.onrender.com/ws/${roomId}`);
 
       this.socket.onmessage = (event) => {
         try {
