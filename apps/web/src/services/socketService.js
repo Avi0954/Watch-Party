@@ -10,7 +10,7 @@ class SocketService {
   connect(roomId, onMessage, onConnect) {
     this.onMessageCallback = onMessage;
     this.onConnectCallback = onConnect;
-    
+
     if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING) && this.roomId === roomId) {
       console.log("Using existing socket connection");
       if (this.socket.readyState === WebSocket.OPEN && onConnect) {
@@ -20,14 +20,14 @@ class SocketService {
     }
 
     this.roomId = roomId;
-    
+
     if (this.socket) {
       this.socket.onclose = null;
       this.socket.close();
     }
 
     try {
-      this.socket = new WebSocket(`wss://watch-party.onrender.com/ws/${roomId}`);
+      this.socket = new WebSocket(`wss://watch-party-07j1.onrender.com/ws/${roomId}`);
 
       this.socket.onmessage = (event) => {
         try {
