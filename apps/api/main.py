@@ -5,6 +5,7 @@ import uuid
 import logging
 import time
 import os
+import asyncio
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -34,6 +35,7 @@ class ConnectionManager:
         self.room_states: dict[str, dict] = {}
         # room_id -> list of messages
         self.room_messages: dict[str, list[dict]] = {}
+        self.host_disconnect_tasks: dict[str, asyncio.Task] = {}
         self.history_file = "chat_history.json"
         self.load_history()
 
@@ -81,40 +83,74 @@ class ConnectionManager:
         if websocket in self.ws_to_user:
             r_id, u_id = self.ws_to_user.pop(websocket)
             
-            # Only remove from room_users if this is still the active socket for that user
+            # Only process if this is still the active socket for that user
             if r_id == room_id and r_id in self.room_users and u_id in self.room_users[r_id]:
                 user_info = self.room_users[r_id][u_id]
                 if user_info.get("websocket") == websocket:
                     username = user_info.get("name", "Someone")
-                    del self.room_users[r_id][u_id]
+                    is_host = self.room_hosts.get(r_id) == u_id
                     
-                    logger.info(f"User {username} ({u_id}) left room {r_id}")
-                    await self.broadcast({"type": "CHAT", "name": "System", "message": f"{username} left the room"}, r_id)
-                    
-                    # Handle host transfer if needed
-                    if self.room_hosts.get(r_id) == u_id:
-                        active_users = list(self.room_users.get(r_id, {}).keys())
-                        if active_users:
-                            new_host_id = active_users[0]
-                            self.room_hosts[r_id] = new_host_id
-                            
-                            # Notify everyone about the host change
-                            await self.broadcast({
-                                "type": "host_changed",
-                                "new_host": new_host_id
-                            }, r_id)
-                            
-                            # Specifically notify the new host about their role
-                            new_host_ws = self.room_users[r_id][new_host_id]["websocket"]
-                            try:
-                                await new_host_ws.send_json({"type": "ROLE", "role": "HOST"})
-                            except: pass
-                        else:
+                    if not is_host:
+                        # For viewers, delete immediately
+                        del self.room_users[r_id][u_id]
+                        logger.info(f"User {username} ({u_id}) left room {r_id}")
+                        await self.broadcast({"type": "CHAT", "name": "System", "message": f"{username} left the room"}, r_id)
+                        await self.broadcast_users(r_id)
+                    else:
+                        # For host, we keep them temporarily
+                        user_info["temporarily_disconnected"] = True
+                        logger.info(f"Host {username} ({u_id}) disconnected temporarily from room {r_id}")
+                        
+                        # Check if any active users remain
+                        active_users = [k for k, v in self.room_users.get(r_id, {}).items() if not v.get("temporarily_disconnected")]
+                        if len(active_users) == 0:
+                            # Auto end room
                             if r_id in self.room_hosts: del self.room_hosts[r_id]
                             if r_id in self.room_states: del self.room_states[r_id]
-                            # We no longer delete room_messages here to ensure persistence across sessions
+                            del self.room_users[r_id]
+                            logger.info(f"Room {r_id} deleted because host left and no users left.")
+                        else:
+                            # Start timeout task to reassign host
+                            loop = asyncio.get_running_loop()
+                            task = loop.create_task(self.schedule_host_reassign(r_id, u_id))
+                            self.host_disconnect_tasks[r_id] = task
+
+    async def schedule_host_reassign(self, room_id: str, old_host_id: str):
+        await asyncio.sleep(10)
+        # Check if old_host is still marked as temporarily disconnected
+        if room_id in self.room_users and old_host_id in self.room_users[room_id]:
+            user_info = self.room_users[room_id][old_host_id]
+            if user_info.get("temporarily_disconnected"):
+                username = user_info.get("name")
+                del self.room_users[room_id][old_host_id]
+                await self.broadcast({"type": "CHAT", "name": "System", "message": f"{username} left the room"}, room_id)
+                
+                # Assign new host deterministically
+                active_users = [k for k, v in self.room_users[room_id].items() if not v.get("temporarily_disconnected")]
+                if active_users:
+                    # Sort by joinTime
+                    active_users.sort(key=lambda k: self.room_users[room_id][k].get("joinTime", 0))
+                    new_host_id = active_users[0]
+                    self.room_hosts[room_id] = new_host_id
                     
-                    await self.broadcast_users(r_id)
+                    await self.broadcast({
+                        "type": "host_changed",
+                        "new_host": new_host_id
+                    }, room_id)
+                    
+                    new_host_ws = self.room_users[room_id][new_host_id]["websocket"]
+                    try:
+                        await new_host_ws.send_json({"type": "ROLE", "role": "HOST"})
+                    except: pass
+                else:
+                    if room_id in self.room_hosts: del self.room_hosts[room_id]
+                    if room_id in self.room_states: del self.room_states[room_id]
+                    del self.room_users[room_id]
+                
+                await self.broadcast_users(room_id)
+        
+        if room_id in self.host_disconnect_tasks:
+            del self.host_disconnect_tasks[room_id]
 
         if room_id in self.active_connections and not self.active_connections[room_id]:
             del self.active_connections[room_id]
@@ -174,7 +210,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                 m_type = message.get("type")
                 logger.debug(f"Received message: {m_type} in room {room_id}")
                 
-                if m_type == "JOIN":
+                if m_type == "JOIN" or m_type == "join_room":
                     user_id = message.get("user_id", str(uuid.uuid4()))
                     username = message.get("name", "Anonymous")
                     avatar = message.get("avatar", "bg-indigo-600")
@@ -182,11 +218,23 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                     is_reconnection = user_id in manager.room_users.get(room_id, {})
                     logger.info(f"User {username} joining room {room_id} (ID: {user_id}, Reconnect: {is_reconnection})")
                     
+                    if is_reconnection:
+                        # Cancel timeout task if it exists
+                        if room_id in manager.host_disconnect_tasks:
+                            manager.host_disconnect_tasks[room_id].cancel()
+                            del manager.host_disconnect_tasks[room_id]
+                        # Restore previous joinTime if available
+                        joinTime = manager.room_users[room_id][user_id].get("joinTime", int(time.time() * 1000))
+                    else:
+                        joinTime = int(time.time() * 1000)
+
                     # Update or add user
                     manager.room_users[room_id][user_id] = {
                         "websocket": websocket,
                         "name": username,
-                        "avatar": avatar
+                        "avatar": avatar,
+                        "joinTime": joinTime,
+                        "temporarily_disconnected": False
                     }
                     manager.ws_to_user[websocket] = (room_id, user_id)
                     
@@ -243,6 +291,20 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                             # 3. System message and user list refresh
                             await manager.broadcast({"type": "CHAT", "name": "System", "message": f"Host transferred to {target_name}"}, room_id)
                             await manager.broadcast_users(room_id)
+
+                elif m_type == "end_room":
+                    if manager.is_host(websocket, room_id):
+                        logger.info(f"Host ended room {room_id}")
+                        await manager.broadcast({"type": "end_room"}, room_id)
+                        # The sockets will be closed by the clients or we can forcefully close them
+                        if room_id in manager.room_hosts: del manager.room_hosts[room_id]
+                        if room_id in manager.room_states: del manager.room_states[room_id]
+                        if room_id in manager.room_users: del manager.room_users[room_id]
+                
+                elif m_type == "host_leaving":
+                    if manager.is_host(websocket, room_id):
+                        # Explicitly invoke temporary disconnect logic earlier
+                        await manager.disconnect(websocket, room_id)
 
                 elif m_type == "CHAT":
                     # Store message in history

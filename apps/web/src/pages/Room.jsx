@@ -46,6 +46,7 @@ const Room = () => {
   const [playing, setPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showHostLeaveModal, setShowHostLeaveModal] = useState(false);
   const [newUrlInput, setNewUrlInput] = useState('');
   const [activeTab, setActiveTab] = useState('chat');
   const [toasts, setToasts] = useState([]);
@@ -57,6 +58,11 @@ const Room = () => {
   const handleJoin = (name) => {
     localStorage.setItem('watchit_username', name);
     setUsername(name);
+  };
+
+  const handleRoomEnd = () => {
+    showToast("The host has ended the room.");
+    setTimeout(() => navigate('/'), 2000);
   };
 
   const {
@@ -73,8 +79,20 @@ const Room = () => {
     handleSendMessage,
     handleTransferHost,
     resyncToHost,
-    handleManualSync
-  } = useSyncPlayer(roomId, playerRef, setPlaying, setUrl, username, selectedAvatar);
+    handleManualSync,
+    handleEndRoom,
+    handleHostLeaving
+  } = useSyncPlayer(roomId, playerRef, setPlaying, setUrl, username, selectedAvatar, handleRoomEnd);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (role === 'HOST') {
+        handleHostLeaving();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [role, handleHostLeaving]);
 
   // Format time helper
   const formatTime = (timestamp) => {
@@ -352,7 +370,13 @@ const Room = () => {
               </div>
 
               <button
-                onClick={() => navigate('/')}
+                onClick={() => {
+                  if (role === 'HOST') {
+                    setShowHostLeaveModal(true);
+                  } else {
+                    navigate('/');
+                  }
+                }}
                 className="flex items-center gap-2 px-4 h-10 ml-5 rounded-lg border border-red-500/20 bg-white/[0.02] text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all duration-200 text-xs font-semibold group"
               >
                 <LogOut className="w-4 h-4 text-red-500/70 group-hover:text-red-500 transition-colors" />
@@ -839,6 +863,53 @@ const Room = () => {
                 Apply Sync
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Host Leave Modal */}
+      {showHostLeaveModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#050816]/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowHostLeaveModal(false)} />
+          <div className="relative w-full max-w-lg bg-gradient-to-b from-[#0B0F1A] to-[#050816] backdrop-blur-xl border border-red-500/20 rounded-[40px] shadow-2xl p-8 lg:p-10 animate-in zoom-in fade-in duration-300">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-red-500" />
+              </div>
+              <h2 className="text-2xl font-black text-white">You are the host</h2>
+              <p className="text-sm text-gray-400 mt-2">What would you like to do before leaving?</p>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                onClick={() => {
+                  setShowHostLeaveModal(false);
+                  setActiveTab('users');
+                  showToast("Please select a user to transfer host role.");
+                }}
+                className="w-full py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-2xl font-bold text-sm transition-all"
+              >
+                Transfer Host
+              </button>
+              
+              <button
+                onClick={() => {
+                  handleEndRoom();
+                  setShowHostLeaveModal(false);
+                  navigate('/');
+                }}
+                className="w-full py-4 bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 rounded-2xl font-bold text-sm transition-all"
+              >
+                End Room for All
+              </button>
+              
+              <button
+                onClick={() => setShowHostLeaveModal(false)}
+                className="w-full py-4 text-gray-500 hover:text-gray-300 font-bold text-sm transition-all"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

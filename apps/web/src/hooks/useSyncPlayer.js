@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import socketService from '../services/socketService';
 
-export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, avatar) => {
+export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, avatar, onRoomEnd) => {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [role, setRole] = useState(null);
@@ -56,11 +56,12 @@ export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, a
     if (!username || !roomId) return;
 
     const handleConnect = () => {
-      console.log("Socket connected, sending JOIN...");
+      console.log("Socket connected, sending join_room...");
       socketService.sendMessage({
-        type: 'JOIN',
+        type: 'join_room',
         name: username,
         user_id: userId,
+        roomId: roomId,
         avatar: avatar
       });
     };
@@ -186,6 +187,9 @@ export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, a
     switch (data.type) {
       case 'ROLE':
         setRole(data.role);
+        break;
+      case 'end_room':
+        if (onRoomEnd) onRoomEnd();
         break;
       case 'host_changed':
         // If I am the new host, my role will be updated via 'ROLE' message sent specifically to me,
@@ -381,6 +385,16 @@ export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, a
     socketService.sendMessage({ type: 'transfer_host', new_host: targetUserId });
   };
 
+  const handleEndRoom = () => {
+    if (role !== 'HOST') return;
+    socketService.sendMessage({ type: 'end_room' });
+  };
+
+  const handleHostLeaving = () => {
+    if (role !== 'HOST') return;
+    socketService.sendMessage({ type: 'host_leaving' });
+  };
+
   return {
     messages,
     setMessages,
@@ -396,6 +410,8 @@ export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, a
     handleSendMessage,
     handleTransferHost,
     resyncToHost,
-    handleManualSync
+    handleManualSync,
+    handleEndRoom,
+    handleHostLeaving
   };
 };

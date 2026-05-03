@@ -29,7 +29,7 @@ class SocketService {
     try {
       this.socket = new WebSocket(`wss://watch-party-07j1.onrender.com/ws/${roomId}`);
 
-      this.socket.onmessage = (event) => {
+      this.socket.onmessage = (event) => {  
         try {
           const data = JSON.parse(event.data);
           if (this.onMessageCallback) this.onMessageCallback(data);
