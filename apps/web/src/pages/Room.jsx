@@ -321,6 +321,20 @@ const Room = () => {
                   )}
                 </div>
               </div>
+
+              <button
+                onClick={() => {
+                  if (role === 'HOST') {
+                    setShowHostLeaveModal(true);
+                  } else {
+                    navigate('/');
+                  }
+                }}
+                className="flex items-center justify-center ml-2 w-9 h-9 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors active:scale-95"
+                title="Leave Room"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Center Section: Desktop Controls */}
