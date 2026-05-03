@@ -286,7 +286,7 @@ const Room = () => {
 
       {/* Header - Adaptive for Desktop */}
       <header className={`flex flex-col bg-white/[0.02] backdrop-blur-md border-b border-white/[0.04] z-30 lg:h-16 lg:justify-center relative transition-all duration-500 ease-in-out ${isKeyboardOpen ? 'h-0 opacity-0 overflow-hidden border-none' : 'h-auto opacity-100'}`}>
-        <div className="max-w-screen-2xl mx-auto w-full px-4 lg:px-12">
+        <div className="max-w-screen-2xl mx-auto w-full px-2 md:px-4 lg:px-12">
           {/* Main Desktop Header & Mobile Row 1 */}
           <div className="h-14 lg:h-20 flex items-center justify-between">
             <div className="flex items-center gap-3 lg:gap-8">
@@ -401,7 +401,7 @@ const Room = () => {
         </div>
 
         {/* Mobile-only Room Code Badge Row */}
-        <div className="px-4 pb-3 flex items-center justify-between lg:hidden">
+        <div className="px-2 md:px-4 pb-1.5 md:pb-3 flex items-center justify-between lg:hidden">
           <div
             className="flex items-center gap-2 bg-[#0B0F1A] border border-white/5 rounded-lg px-3 py-1.5 cursor-pointer active:scale-95 transition-transform"
             onClick={copyRoomId}
@@ -430,9 +430,9 @@ const Room = () => {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col md:flex-row max-w-[1400px] 2xl:max-w-[1500px] mx-auto w-full px-4 lg:px-5 py-6 gap-4 lg:gap-5 items-start md:items-stretch overflow-hidden md:max-h-[85dvh]">
+      <main className="flex-1 flex flex-col md:flex-row max-w-[1400px] 2xl:max-w-[1500px] mx-auto w-full px-2 md:px-4 lg:px-5 py-1.5 md:py-6 gap-1.5 md:gap-4 lg:gap-5 items-start md:items-stretch overflow-hidden md:max-h-[85dvh]">
         {/* Video Section */}
-        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} md:aspect-auto md:flex-1 bg-black relative overflow-hidden group rounded-[32px] shadow-2xl border border-white/5 shrink-0 transition-all duration-500 ease-in-out`}>
+        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} md:aspect-auto md:flex-1 bg-black relative overflow-hidden group rounded-xl md:rounded-[32px] shadow-2xl border border-white/5 shrink-0 transition-all duration-500 ease-in-out`}>
           <ReactPlayer
             ref={playerRef}
             url={url}
@@ -459,12 +459,12 @@ const Room = () => {
         </div>
 
         {/* Chat Panel - Sidebar on Desktop, Bottom Sheet on Mobile */}
-        <div className="w-full md:w-[340px] lg:w-[380px] flex-1 md:flex-none flex flex-col bg-slate-900/90 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-2xl overflow-hidden relative transition-all duration-500 ease-in-out">
+        <div className="w-full md:w-[340px] lg:w-[380px] flex-1 md:flex-none flex flex-col bg-slate-900/90 backdrop-blur-2xl rounded-lg md:rounded-[32px] border border-white/10 shadow-2xl overflow-hidden relative transition-all duration-500 ease-in-out">
           {/* Tabs Navigation */}
-          <div className="flex border-b border-white/5 bg-white/5 backdrop-blur-md sticky top-0 z-20 px-4 pt-3">
+          <div className="flex border-b border-white/5 bg-white/5 backdrop-blur-md sticky top-0 z-20 px-2 md:px-4 pt-2 md:pt-3">
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'chat' ? 'text-blue-500' : 'text-gray-400'}`}
+              className={`flex-1 flex items-center justify-center gap-2 py-1 md:py-1.5 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'chat' ? 'text-blue-500' : 'text-gray-400'}`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
               Chat
@@ -472,7 +472,7 @@ const Room = () => {
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`flex flex-1 items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'users' ? 'text-blue-500' : 'text-gray-400'}`}
+              className={`flex flex-1 items-center justify-center gap-2 py-1 md:py-1.5 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'users' ? 'text-blue-500' : 'text-gray-400'}`}
             >
               <Users className="w-3.5 h-3.5" />
               Users ({users.length})
@@ -486,7 +486,7 @@ const Room = () => {
                 <div
                   ref={scrollRef}
                   onScroll={handleChatScroll}
-                  className="flex-1 overflow-y-auto pt-4 pb-3 scroll-smooth custom-scrollbar relative"
+                  className="flex-1 overflow-y-auto pt-2 md:pt-4 pb-2 md:pb-3 scroll-smooth custom-scrollbar relative"
                 >
                   <div className="min-h-full flex flex-col justify-end">
                     {messages.map((m, i) => {
@@ -497,7 +497,7 @@ const Room = () => {
 
                     if (isSystem) {
                       return (
-                        <div key={i} className="flex justify-center py-3 animate-in fade-in duration-200 px-6">
+                        <div key={i} className="flex justify-center py-1.5 md:py-3 animate-in fade-in duration-200 px-3 md:px-6">
                           <span className="text-[11px] text-white/40 font-medium text-center">
                             {m.text}
                           </span>
@@ -506,7 +506,7 @@ const Room = () => {
                     }
 
                     return (
-                      <div key={i} className={`flex ${isMe ? 'justify-end' : 'justify-start gap-2.5 items-start'} ${isFirstInGroup ? 'mt-[10px]' : 'mt-[4px]'} px-4 animate-in fade-in duration-200`}>
+                      <div key={i} className={`flex ${isMe ? 'justify-end' : 'justify-start gap-2.5 items-start'} ${isFirstInGroup ? 'mt-[10px]' : 'mt-[4px]'} px-2 md:px-4 animate-in fade-in duration-200`}>
                         {!isMe && (
                           <div className="w-7 h-7 flex-shrink-0 mt-1">
                             {isFirstInGroup ? (
@@ -551,13 +551,13 @@ const Room = () => {
                 )}
 
                 {/* Chat Input */}
-                <div className="p-4 bg-white/5 border-t border-white/5 backdrop-blur-md sticky bottom-0 z-20">
+                <div className="p-2 md:p-4 bg-white/5 border-t border-white/5 backdrop-blur-md sticky bottom-0 z-20">
                   <form onSubmit={sendChatMessage} className="flex gap-2">
                     <input
                       type="text"
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
-                      className="flex-1 bg-white/5 border border-white/10 p-3.5 rounded-full outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-sm placeholder:text-gray-400 text-white shadow-inner backdrop-blur-md"
+                      className="flex-1 bg-white/5 border border-white/10 py-1.5 md:py-3.5 px-3 md:px-3.5 rounded-full outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-xs md:text-sm placeholder:text-gray-400 text-white shadow-inner backdrop-blur-md"
                       placeholder="Type a message..."
                     />
                     <button
@@ -570,7 +570,7 @@ const Room = () => {
                 </div>
               </>
             ) : (
-              <div className="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto px-2 md:px-4 py-3 md:py-6 space-y-1.5 custom-scrollbar">
                 <div className="flex items-center justify-between mb-6 px-1">
                   <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                     <Users className="w-3 h-3 text-blue-500" />
@@ -582,7 +582,7 @@ const Room = () => {
                 </div>
 
                 {/* Current User Info for Mobile */}
-                <div className="lg:hidden mb-8 p-4 bg-indigo-500/10 rounded-2xl border border-blue-500/20 shadow-lg animate-in fade-in slide-in-from-top-2">
+                <div className="lg:hidden mb-4 md:mb-8 p-3 md:p-4 bg-indigo-500/10 rounded-xl md:rounded-2xl border border-blue-500/20 shadow-lg animate-in fade-in slide-in-from-top-2">
                   <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                     <User className="w-3 h-3 text-blue-500" />
                     My Identity
