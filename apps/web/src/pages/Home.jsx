@@ -31,7 +31,7 @@ const Home = () => {
       const response = await axios.post(`${API_URL}/create-room`);
       const { room_id, token } = response.data;
       localStorage.setItem(`token_${room_id}`, token);
-      navigate(`/room/${room_id}?name=${encodeURIComponent(username.trim())}&avatar=${selectedAvatar}`);
+      navigate(`/room/${room_id}?token=${token}&name=${encodeURIComponent(username.trim())}&avatar=${selectedAvatar}`);
     } catch (error) {
       console.error(error);
       alert('Error creating room');

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import socketService from '../services/socketService';
 
-export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, avatar, onRoomEnd) => {
+export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, avatar, onRoomEnd, token) => {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [role, setRole] = useState(null);
@@ -71,7 +71,7 @@ export const useSyncPlayer = (roomId, playerRef, setPlaying, setUrl, username, a
     };
 
     console.log("Setting up socket connection...");
-    socketService.connect(roomId, handleMessage, handleConnect);
+    socketService.connect(roomId, handleMessage, handleConnect, token);
 
     return () => {
       socketService.disconnect();

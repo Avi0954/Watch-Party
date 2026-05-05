@@ -7,7 +7,7 @@ class SocketService {
     this.maxReconnectAttempts = 5;
   }
 
-  connect(roomId, onMessage, onConnect) {
+  connect(roomId, onMessage, onConnect, token) {
     this.onMessageCallback = onMessage;
     this.onConnectCallback = onConnect;
 
@@ -28,7 +28,6 @@ class SocketService {
 
     try {
       const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const token = localStorage.getItem(`token_${roomId}`);
       const wsUrl = baseUrl.replace(/^http/, "ws") + `/ws/${roomId}${token ? `?token=${token}` : ""}`;
       this.socket = new WebSocket(wsUrl);
 
@@ -60,7 +59,7 @@ class SocketService {
         if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
           console.log(`Reconnecting (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-          setTimeout(() => this.connect(this.roomId, this.onMessageCallback, this.onConnectCallback), 2000);
+          setTimeout(() => this.connect(this.roomId, this.onMessageCallback, this.onConnectCallback, token), 2000);
         }
       };
 

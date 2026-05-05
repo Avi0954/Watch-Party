@@ -41,6 +41,11 @@ const Room = () => {
     return query.get('avatar') || 'ghost';
   });
 
+  const [token] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("token");
+  });
+
   const [inputMessage, setInputMessage] = useState('');
   const [url, setUrl] = useState('https://www.youtube.com/watch?v=aqz-KE-bpKQ');
   const [playing, setPlaying] = useState(false);
@@ -82,7 +87,7 @@ const Room = () => {
     handleManualSync,
     handleEndRoom,
     handleHostLeaving
-  } = useSyncPlayer(roomId, playerRef, setPlaying, setUrl, username, selectedAvatar, handleRoomEnd);
+  } = useSyncPlayer(roomId, playerRef, setPlaying, setUrl, username, selectedAvatar, handleRoomEnd, token);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -222,6 +227,12 @@ const Room = () => {
       showToast("Video synced for everyone!");
     }
   };
+
+  if (!token) {
+    alert("Invalid session. Please create a new room.");
+    navigate('/');
+    return null;
+  }
 
   if (!username) {
     return (
