@@ -279,7 +279,9 @@ class ConnectionManager:
                         logger.error(f"Broadcast error to connection: {e}")
                         pass
 
+# Single global instance of ConnectionManager
 manager = ConnectionManager()
+
 
 @app.get("/")
 @limiter.limit("5/minute")
@@ -289,6 +291,7 @@ async def health_check(request: Request):
 @app.post("/create-room")
 @limiter.limit("10/minute")
 async def create_room(request: Request, room_data: RoomCreate = None):
+    logger.info(f"CREATE_ROOM: Using manager instance {id(manager)}")
     room_id = str(uuid.uuid4())[:8]
     manager.valid_rooms.add(room_id)
     
@@ -308,6 +311,7 @@ async def create_room(request: Request, room_data: RoomCreate = None):
 
 @app.websocket("/ws/{room_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = None):
+    logger.info(f"WS_CONNECT: Attempting to connect to room {room_id} using manager {id(manager)}")
     await websocket.accept()
     
     # Validate room existence against explicit registry
