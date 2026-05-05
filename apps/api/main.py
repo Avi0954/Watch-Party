@@ -120,6 +120,11 @@ class ConnectionManager:
             logger.error(f"Error saving history: {e}")
 
     async def connect(self, websocket: WebSocket, room_id: str):
+        # Final safety check: Reject if room is not in registry
+        if room_id not in self.valid_rooms:
+            logger.error(f"Connect failed: {room_id} not in registry.")
+            raise Exception("Room not initialized")
+
         # Enforce single active host
         if getattr(websocket, "role", None) == "host" and room_id not in self.hosts:
             self.hosts[room_id] = websocket
