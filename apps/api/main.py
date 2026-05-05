@@ -74,8 +74,10 @@ async def get_current_user(token: str = Depends(lambda r: r.query_params.get("to
             token, 
             SECRET_KEY, 
             algorithms=[ALGORITHM],
-            options={"require": ["exp", "nbf"]},
-            leeway=5
+            options={
+                "require": ["exp", "nbf"],
+                "leeway": 5
+            }
         )
         return payload
     except JWTError:
@@ -315,7 +317,11 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
     await websocket.accept()
     
     token = websocket.query_params.get("token")
+    print("ROOM_ID:", room_id)
+    print("TOKEN:", token)
+
     if not token:
+        print("JWT ERROR: Token missing")
         await websocket.close(code=1008)
         return
     try:
@@ -323,14 +329,19 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
             token, 
             SECRET_KEY, 
             algorithms=[ALGORITHM],
-            options={"require": ["exp", "nbf"]},
-            leeway=5
+            options={
+                "require": ["exp", "nbf"],
+                "leeway": 5
+            }
         )
+        print("TOKEN SUB:", payload.get("sub"))
         if payload.get("sub") != room_id:
+            print(f"JWT ERROR: Room ID mismatch. Expected {room_id}, got {payload.get('sub')}")
             await websocket.close(code=1008)
             return
         websocket.role = payload.get("role", "viewer")
-    except JWTError:
+    except Exception as e:
+        print("JWT ERROR:", str(e))
         await websocket.close(code=1008)
         return
 
