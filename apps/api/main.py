@@ -314,11 +314,15 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
     logger.info(f"WS_CONNECT: Attempting to connect to room {room_id} using manager {id(manager)}")
     await websocket.accept()
     
-    # Validate room existence against explicit registry
-    if room_id not in manager.valid_rooms:
-        logger.warning(f"Connection rejected: Room {room_id} does not exist in registry.")
-        await websocket.close(code=1008)
-        return
+    # Ensure room state exists (lazy initialization for production multi-instance)
+    if room_id not in manager.room_states:
+        manager.valid_rooms.add(room_id)
+        manager.room_states[room_id] = {
+            "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+            "isPlaying": False,
+            "baseTime": 0,
+            "startTimestamp": int(time.time() * 1000)
+        }
 
     if not token:
         await websocket.close(code=1008)
