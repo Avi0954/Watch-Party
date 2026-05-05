@@ -23,14 +23,19 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError("JWT_SECRET_KEY must be set")
 ALGORITHM = "HS256"
-origins = os.getenv("ALLOWED_ORIGINS")
-if not origins:
-    raise ValueError("ALLOWED_ORIGINS must be set")
-ALLOWED_ORIGINS = [origin.strip() for origin in origins.split(",")]
+
 
 # Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+
+origins = os.getenv("ALLOWED_ORIGINS")
+if not origins:
+    raise ValueError("ALLOWED_ORIGINS must be set")
+
+ALLOWED_ORIGINS = [origin.strip() for origin in origins.split(",")]
+print("CORS ORIGINS:", ALLOWED_ORIGINS)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
