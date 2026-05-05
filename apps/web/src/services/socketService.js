@@ -27,7 +27,9 @@ class SocketService {
     }
 
     try {
-      this.socket = new WebSocket(`wss://watch-party-07j1.onrender.com/ws/${roomId}`);
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const wsUrl = baseUrl.replace(/^http/, "ws") + `/ws/${roomId}`;
+      this.socket = new WebSocket(wsUrl);
 
       this.socket.onmessage = (event) => {  
         try {
