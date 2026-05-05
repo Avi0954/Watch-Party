@@ -26,7 +26,8 @@ ALGORITHM = "HS256"
 origins = os.getenv("ALLOWED_ORIGINS")
 if not origins:
     raise ValueError("ALLOWED_ORIGINS must be set")
-ALLOWED_ORIGINS = origins.split(",")
+ALLOWED_ORIGINS = [o.strip() for o in origins.split(",")]
+print("CORS ORIGINS:", ALLOWED_ORIGINS)
 
 # Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
