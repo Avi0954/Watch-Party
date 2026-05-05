@@ -29,11 +29,17 @@ ALGORITHM = "HS256"
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 
-origins = os.getenv("ALLOWED_ORIGINS")
-if not origins:
+# --- CORS SETUP ---
+origins_env = os.getenv("ALLOWED_ORIGINS")
+if not origins_env:
     raise ValueError("ALLOWED_ORIGINS must be set")
 
-ALLOWED_ORIGINS = [origin.strip() for origin in origins.split(",")]
+# Safety: trim whitespace, remove quotes, and remove trailing slashes
+ALLOWED_ORIGINS = [
+    origin.strip().replace('"', '').replace("'", "").rstrip("/")
+    for origin in origins_env.split(",")
+    if origin.strip()
+]
 print("CORS ORIGINS:", ALLOWED_ORIGINS)
 
 app.add_middleware(
@@ -43,6 +49,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# --- END CORS SETUP ---
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
