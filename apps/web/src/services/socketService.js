@@ -28,7 +28,8 @@ class SocketService {
 
     try {
       const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const wsUrl = baseUrl.replace(/^http/, "ws") + `/ws/${roomId}`;
+      const token = localStorage.getItem(`token_${roomId}`);
+      const wsUrl = baseUrl.replace(/^http/, "ws") + `/ws/${roomId}${token ? `?token=${token}` : ""}`;
       this.socket = new WebSocket(wsUrl);
 
       this.socket.onmessage = (event) => {  

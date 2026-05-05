@@ -314,20 +314,10 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
     logger.info(f"WS_CONNECT: Attempting to connect to room {room_id} using manager {id(manager)}")
     await websocket.accept()
     
-    # Ensure room state exists (lazy initialization for production multi-instance)
-    if room_id not in manager.room_states:
-        manager.valid_rooms.add(room_id)
-        manager.room_states[room_id] = {
-            "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-            "isPlaying": False,
-            "baseTime": 0,
-            "startTimestamp": int(time.time() * 1000)
-        }
-
+    token = websocket.query_params.get("token")
     if not token:
-        logger.warning(f"No token provided for room {room_id}, allowing connection anyway.")
-        # await websocket.close(code=1008)
-        # return
+        await websocket.close(code=1008)
+        return
     try:
         payload = jwt.decode(
             token, 
@@ -337,14 +327,12 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
             leeway=5
         )
         if payload.get("sub") != room_id:
-            logger.warning(f"Token room mismatch: {payload.get('sub')} != {room_id}")
-            # await websocket.close(code=1008)
-            # return
+            await websocket.close(code=1008)
+            return
         websocket.role = payload.get("role", "viewer")
     except JWTError:
-        logger.warning(f"JWT validation failed for room {room_id}")
-        # await websocket.close(code=1008)
-        # return
+        await websocket.close(code=1008)
+        return
 
     await manager.connect(websocket, room_id)
     try:
@@ -371,21 +359,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
                 logger.debug(f"Received message: {m_type} in room {room_id}")
                 
                 if m_type == "JOIN" or m_type == "join_room":
-                    # Lazy initialization for production instances
-                    if room_id not in manager.room_states:
-                        manager.room_states[room_id] = {
-                            "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-                            "isPlaying": False,
-                            "baseTime": 0,
-                            "startTimestamp": int(time.time() * 1000)
-                        }
-                    if room_id not in manager.room_users:
-                        manager.room_users[room_id] = {}
-                    if room_id not in manager.room_messages:
-                        manager.room_messages[room_id] = []
-                    if room_id not in manager.active_connections:
-                        manager.active_connections[room_id] = []
-                        
                     user_id = message.get("user_id", str(uuid.uuid4()))
                     username = message.get("name", "Anonymous")
                     avatar = message.get("avatar", "bg-indigo-600")
