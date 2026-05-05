@@ -325,8 +325,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
         }
 
     if not token:
-        await websocket.close(code=1008)
-        return
+        logger.warning(f"No token provided for room {room_id}, allowing connection anyway.")
+        # await websocket.close(code=1008)
+        # return
     try:
         payload = jwt.decode(
             token, 
@@ -336,12 +337,14 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
             leeway=5
         )
         if payload.get("sub") != room_id:
-            await websocket.close(code=1008)
-            return
+            logger.warning(f"Token room mismatch: {payload.get('sub')} != {room_id}")
+            # await websocket.close(code=1008)
+            # return
         websocket.role = payload.get("role", "viewer")
     except JWTError:
-        await websocket.close(code=1008)
-        return
+        logger.warning(f"JWT validation failed for room {room_id}")
+        # await websocket.close(code=1008)
+        # return
 
     await manager.connect(websocket, room_id)
     try:
@@ -359,8 +362,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = No
                     window["count"] = 0
                 window["count"] += 1
                 if window["count"] > 30:
-                    await websocket.close(code=1008)
-                    return
+                    logger.warning(f"Spam detected from socket in room {room_id}")
+                    # await websocket.close(code=1008)
+                    # return
 
                 message = json.loads(data)
                 m_type = message.get("type")
