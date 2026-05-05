@@ -46,6 +46,14 @@ class SocketService {
 
       this.socket.onclose = (event) => {
         console.log("Disconnected from socket:", event.code, event.reason);
+
+        // Handle invalid room or unauthorized access
+        if (event.code === 1008) {
+          alert("Room does not exist or session is invalid.");
+          window.location.href = "/";
+          return;
+        }
+
         if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
           console.log(`Reconnecting (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);

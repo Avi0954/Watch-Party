@@ -2,4 +2,9 @@ fastapi
 uvicorn
 websockets
 python-multipart
-axios
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+slowapi
+pydantic
+pydantic-settings

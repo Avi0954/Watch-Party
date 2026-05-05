@@ -1,25 +1,86 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, constr
+from jose import JWTError, jwt
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import json
 import uuid
 import logging
 import time
 import os
 import asyncio
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Environment Variables
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY must be set")
+ALGORITHM = "HS256"
+origins = os.getenv("ALLOWED_ORIGINS")
+if not origins:
+    raise ValueError("ALLOWED_ORIGINS must be set")
+ALLOWED_ORIGINS = origins.split(",")
+
+# Rate Limiter
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(SlowAPIMiddleware)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+# JWT Auth
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    now = datetime.utcnow()
+    to_encode["nbf"] = now
+    to_encode["exp"] = now + timedelta(hours=2)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+async def get_current_user(token: str = Depends(lambda r: r.query_params.get("token"))):
+    if not token:
+        raise HTTPException(status_code=401, detail="Token missing")
+    try:
+        payload = jwt.decode(
+            token, 
+            SECRET_KEY, 
+            algorithms=[ALGORITHM],
+            options={"require": ["exp", "nbf"]},
+            leeway=5
+        )
+        return payload
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# Models
+class RoomCreate(BaseModel):
+    name: constr(max_length=50) | None = None
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global error: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal Server Error"},
+    )
 
 class ConnectionManager:
     def __init__(self):
@@ -36,6 +97,8 @@ class ConnectionManager:
         # room_id -> list of messages
         self.room_messages: dict[str, list[dict]] = {}
         self.host_disconnect_tasks: dict[str, asyncio.Task] = {}
+        self.hosts: dict[str, WebSocket] = {}
+        self.valid_rooms: set[str] = set()
         self.history_file = "chat_history.json"
         self.load_history()
 
@@ -57,27 +120,21 @@ class ConnectionManager:
             logger.error(f"Error saving history: {e}")
 
     async def connect(self, websocket: WebSocket, room_id: str):
-        await websocket.accept()
-        if room_id not in self.active_connections:
-            self.active_connections[room_id] = []
-            self.room_users[room_id] = {}
-            self.room_states[room_id] = {
-                "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-                "isPlaying": False,
-                "baseTime": 0,
-                "startTimestamp": int(time.time() * 1000)
-            }
-        
-        if room_id not in self.room_messages:
-            self.room_messages[room_id] = []
-            self.save_history()
-        
+        # Enforce single active host
+        if getattr(websocket, "role", None) == "host" and room_id not in self.hosts:
+            self.hosts[room_id] = websocket
+
         self.active_connections[room_id].append(websocket)
         logger.info(f"Client socket connected to room: {room_id}")
 
     async def disconnect(self, websocket: WebSocket, room_id: str):
-        if websocket in self.active_connections.get(room_id, []):
-            self.active_connections[room_id].remove(websocket)
+        if room_id in self.active_connections:
+            if websocket in self.active_connections[room_id]:
+                self.active_connections[room_id].remove(websocket)
+        
+        # Clear host if host disconnects
+        if self.hosts.get(room_id) == websocket:
+            del self.hosts[room_id]
         
         # Check if we have user mapping for this socket
         if websocket in self.ws_to_user:
@@ -105,15 +162,26 @@ class ConnectionManager:
                         active_users = [k for k, v in self.room_users.get(r_id, {}).items() if not v.get("temporarily_disconnected")]
                         if len(active_users) == 0:
                             # Auto end room
-                            if r_id in self.room_hosts: del self.room_hosts[r_id]
-                            if r_id in self.room_states: del self.room_states[r_id]
-                            del self.room_users[r_id]
-                            logger.info(f"Room {r_id} deleted because host left and no users left.")
+                            self.room_hosts.pop(r_id, None)
+                            self.room_states.pop(r_id, None)
+                            self.room_users.pop(r_id, None)
+                            self.valid_rooms.discard(r_id)
+                            logger.info(f"Room {r_id} purged: host left and no viewers remain.")
                         else:
                             # Start timeout task to reassign host
                             loop = asyncio.get_running_loop()
                             task = loop.create_task(self.schedule_host_reassign(r_id, u_id))
                             self.host_disconnect_tasks[r_id] = task
+
+        # Global Empty Room Cleanup (Safe)
+        if room_id in self.active_connections and not self.active_connections[room_id]:
+            self.active_connections.pop(room_id, None)
+            self.room_users.pop(room_id, None)
+            self.room_states.pop(room_id, None)
+            self.hosts.pop(room_id, None)
+            self.room_hosts.pop(room_id, None)
+            self.valid_rooms.discard(room_id)
+            logger.info(f"Room {room_id} fully cleaned up from memory.")
 
     async def schedule_host_reassign(self, room_id: str, old_host_id: str):
         await asyncio.sleep(10)
@@ -139,9 +207,23 @@ class ConnectionManager:
                     }, room_id)
                     
                     new_host_ws = self.room_users[room_id][new_host_id]["websocket"]
-                    try:
-                        await new_host_ws.send_json({"type": "ROLE", "role": "HOST"})
-                    except: pass
+                    if new_host_ws in self.active_connections.get(room_id, []):
+                        self.hosts[room_id] = new_host_ws
+                        new_host_ws.role = "host"
+                        
+                        # Notify all users of host change
+                        for ws in self.active_connections.get(room_id, []):
+                            try:
+                                await ws.send_json({
+                                    "type": "HOST_CHANGED",
+                                    "hostId": new_host_id
+                                })
+                            except:
+                                pass
+
+                        try:
+                            await new_host_ws.send_json({"type": "ROLE", "role": "HOST"})
+                        except: pass
                 else:
                     if room_id in self.room_hosts: del self.room_hosts[room_id]
                     if room_id in self.room_states: del self.room_states[room_id]
@@ -153,15 +235,13 @@ class ConnectionManager:
             del self.host_disconnect_tasks[room_id]
 
         if room_id in self.active_connections and not self.active_connections[room_id]:
-            del self.active_connections[room_id]
-            if room_id in self.room_users: del self.room_users[room_id]
+            self.active_connections.pop(room_id, None)
+            self.room_users.pop(room_id, None)
         
         logger.info(f"Socket disconnected from room: {room_id}")
 
     def is_host(self, websocket: WebSocket, room_id: str) -> bool:
-        if websocket not in self.ws_to_user: return False
-        _, user_id = self.ws_to_user[websocket]
-        return self.room_hosts.get(room_id) == user_id
+        return self.hosts.get(room_id) == websocket
 
     async def broadcast_users(self, room_id: str):
         if room_id in self.room_users:
@@ -191,21 +271,78 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 @app.get("/")
-async def health_check():
+@limiter.limit("5/minute")
+async def health_check(request: Request):
     return {"status": "ok"}
 
 @app.post("/create-room")
-async def create_room():
+@limiter.limit("10/minute")
+async def create_room(request: Request, room_data: RoomCreate = None):
     room_id = str(uuid.uuid4())[:8]
-    return {"room_id": room_id}
+    manager.valid_rooms.add(room_id)
+    
+    # Explicitly initialize room state
+    manager.active_connections[room_id] = []
+    manager.room_users[room_id] = {}
+    manager.room_messages[room_id] = []
+    manager.room_states[room_id] = {
+        "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+        "isPlaying": False,
+        "baseTime": 0,
+        "startTimestamp": int(time.time() * 1000)
+    }
+    
+    token = create_access_token({"sub": room_id, "role": "host"})
+    return {"room_id": room_id, "token": token}
 
 @app.websocket("/ws/{room_id}")
-async def websocket_endpoint(websocket: WebSocket, room_id: str):
+async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = None):
+    await websocket.accept()
+    
+    # Validate room existence against explicit registry
+    if room_id not in manager.valid_rooms:
+        logger.warning(f"Connection rejected: Room {room_id} does not exist in registry.")
+        await websocket.close(code=1008)
+        return
+
+    if not token:
+        await websocket.close(code=1008)
+        return
+    try:
+        payload = jwt.decode(
+            token, 
+            SECRET_KEY, 
+            algorithms=[ALGORITHM],
+            options={"require": ["exp", "nbf"]},
+            leeway=5
+        )
+        if payload.get("sub") != room_id:
+            await websocket.close(code=1008)
+            return
+        websocket.role = payload.get("role", "viewer")
+    except JWTError:
+        await websocket.close(code=1008)
+        return
+
     await manager.connect(websocket, room_id)
     try:
         while True:
             try:
                 data = await websocket.receive_text()
+                
+                # Production-grade WebSocket Spam Protection
+                now = time.time()
+                if not hasattr(websocket, "msg_window"):
+                    websocket.msg_window = {"start": now, "count": 0}
+                window = websocket.msg_window
+                if now - window["start"] > 10:
+                    window["start"] = now
+                    window["count"] = 0
+                window["count"] += 1
+                if window["count"] > 30:
+                    await websocket.close(code=1008)
+                    return
+
                 message = json.loads(data)
                 m_type = message.get("type")
                 logger.debug(f"Received message: {m_type} in room {room_id}")
@@ -366,6 +503,16 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
     except Exception as e:
         logger.error(f"WebSocket Error: {e}")
         await manager.disconnect(websocket, room_id)
+
+@app.post("/chat")
+@limiter.limit("20/minute")
+async def chat_endpoint(request: Request):
+    return {"status": "ok"}
+
+@app.post("/join-room")
+@limiter.limit("10/minute")
+async def join_room_endpoint(request: Request):
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     import uvicorn
