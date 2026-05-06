@@ -293,8 +293,8 @@ async def health_check(request: Request):
 @app.post("/create-room")
 @limiter.limit("10/minute")
 async def create_room(request: Request, room_data: RoomCreate = None):
-    logger.info(f"CREATE_ROOM: Using manager instance {id(manager)}")
-    room_id = str(uuid.uuid4())[:8]
+    logger.info(f"CREATE_ROOM: Attempting to create room. Manager instance {id(manager)}")
+    room_id = str(uuid.uuid4())[:8].upper() # Normalize to uppercase
     manager.valid_rooms.add(room_id)
     
     # Explicitly initialize room state
@@ -309,16 +309,24 @@ async def create_room(request: Request, room_data: RoomCreate = None):
     }
     
     token = create_access_token({"sub": room_id, "role": "host"})
+    logger.info(f"CREATE_ROOM: Room {room_id} created successfully.")
     return {"room_id": room_id, "token": token}
 
 @app.websocket("/ws/{room_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str = None):
-    logger.info(f"WS_CONNECT: Attempting to connect to room {room_id} using manager {id(manager)}")
+    room_id = room_id.strip().upper() # Normalize room ID
+    logger.info(f"WS_CONNECT: Attempting to connect to room {room_id}")
+    
+    if room_id not in manager.valid_rooms:
+        logger.warning(f"WS_CONNECT: Rejected. Room {room_id} does not exist.")
+        await websocket.accept() # Accept to send a close code
+        await websocket.close(code=1008)
+        return
+
     await websocket.accept()
     
     token = websocket.query_params.get("token")
-    print("ROOM_ID:", room_id)
-    print("TOKEN:", token)
+    logger.info(f"WS_CONNECT: Room ID: {room_id}, Token present: {bool(token)}")
 
     if not token:
         print("JWT ERROR: Token missing")
@@ -534,7 +542,29 @@ async def chat_endpoint(request: Request):
 @app.post("/join-room")
 @limiter.limit("10/minute")
 async def join_room_endpoint(request: Request):
-    return {"status": "ok"}
+    try:
+        data = await request.json()
+        room_id = data.get("room_id", "").strip().upper()
+        
+        logger.info(f"JOIN_ROOM_API: Attempting to join room {room_id}")
+        
+        if not room_id:
+            raise HTTPException(status_code=400, detail="Room ID is required")
+            
+        if room_id not in manager.valid_rooms:
+            logger.warning(f"JOIN_ROOM_API: Room {room_id} not found")
+            raise HTTPException(status_code=404, detail="Room not found")
+            
+        token = create_access_token({"sub": room_id, "role": "viewer"})
+        logger.info(f"JOIN_ROOM_API: Token generated for room {room_id}")
+        return {"status": "ok", "token": token, "room_id": room_id}
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"JOIN_ROOM_API Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 if __name__ == "__main__":
     import uvicorn

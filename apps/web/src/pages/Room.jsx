@@ -23,7 +23,8 @@ const AvatarIcon = ({ avatar, className }) => {
 };
 
 const Room = () => {
-  const { roomId } = useParams();
+  const { roomId: rawRoomId } = useParams();
+  const roomId = rawRoomId?.toUpperCase();
   const navigate = useNavigate();
   const location = useLocation();
   const [username, setUsername] = useState(() => {
