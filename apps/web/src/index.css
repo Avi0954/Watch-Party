@@ -1,8 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  background-color: #050816;
+  background-color: #070B17;
   color: white;
+  font-family: 'Shantell Sans', 'Comic Neue', 'Gaegu', 'Caveat', cursive, sans-serif;
+}
+
+body {
+  font-family: 'Shantell Sans', 'Comic Neue', 'Gaegu', 'Caveat', cursive, sans-serif;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-display {
+  font-family: 'Shantell Sans', 'Comic Neue', 'Gaegu', cursive, sans-serif;
+}
+
+.font-handdrawn {
+  font-family: 'Shantell Sans', 'Comic Neue', 'Gaegu', 'Caveat', cursive, sans-serif;
 }
 
 @layer utilities {
@@ -10,16 +27,20 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
   }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
   }
