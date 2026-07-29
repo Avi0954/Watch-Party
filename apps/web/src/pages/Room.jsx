@@ -361,6 +361,28 @@ const Room = () => {
           />
         </div>
 
+        {/* Chat Sidebar Component */}
+        <ChatSidebar
+          messages={messages}
+          users={users}
+          username={username}
+          selectedAvatar={selectedAvatar}
+          role={role}
+          inputMessage={inputMessage}
+          setInputMessage={setInputMessage}
+          sendChatMessage={sendChatMessage}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          formatTime={formatTime}
+          handleTransferHost={handleTransferHost}
+          openUserMenuId={openUserMenuId}
+          setOpenUserMenuId={setOpenUserMenuId}
+          setIsModalOpen={setIsModalOpen}
+          showScrollIndicator={showScrollIndicator}
+          scrollRef={scrollRef}
+          chatEndRef={chatEndRef}
+          handleChatScroll={handleChatScroll}
+        />
       </main>
 
       {/* Mobile Participants Bottom Sheet */}
