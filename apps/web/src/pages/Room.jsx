@@ -7,6 +7,8 @@ import {
   Ghost, Cat, Dog, Bot, Smile, Sparkles, MoreVertical
 } from 'lucide-react';
 import { useSyncPlayer } from '../hooks/useSyncPlayer';
+import Navbar from '../components/Navbar';
+import ChatSidebar from '../components/ChatSidebar';
 
 const AVATAR_MAP = {
   ghost: Ghost,
@@ -289,162 +291,51 @@ const Room = () => {
 
   return (
     <div
-      className="flex flex-col bg-[#050816] text-white overflow-hidden font-sans selection:bg-cyan-500/30 relative"
+      className="flex flex-col bg-[#090B18] text-white overflow-hidden font-handdrawn selection:bg-purple-500/30 relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#131938] via-[#090B18] to-[#050711]"
       style={{ height: 'var(--visual-viewport-height, 100dvh)' }}
     >
-      {/* Subtle background glow for the whole room */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/5 blur-[100px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-600/5 blur-[100px] rounded-full pointer-events-none" />
+      {/* Decorative Hand-Drawn Edge Doodles */}
+      <svg className="absolute top-16 left-6 w-6 h-6 text-purple-400 opacity-40 pointer-events-none animate-sparkle-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+      </svg>
+      <svg className="absolute bottom-6 left-10 w-8 h-8 text-amber-400 opacity-30 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M4 12 C 8 8, 16 16, 20 12" />
+      </svg>
 
-      {/* Header - Adaptive for Desktop */}
-      <header className={`flex flex-col bg-white/[0.02] backdrop-blur-md border-b border-white/[0.04] z-30 lg:h-16 lg:justify-center relative transition-all duration-500 ease-in-out ${isKeyboardOpen ? 'h-0 opacity-0 overflow-hidden border-none' : 'h-auto opacity-100'}`}>
-        <div className="max-w-screen-2xl mx-auto w-full px-2 md:px-4 lg:px-12">
-          {/* Main Desktop Header & Mobile Row 1 */}
-          <div className="h-14 lg:h-20 flex items-center justify-between">
-            <div className="flex items-center gap-3 lg:gap-8">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigate('/')}
-                  className="p-2 -ml-2 hover:bg-white/5 rounded-full transition-colors lg:hidden flex items-center justify-center"
-                >
-                  <ChevronLeft className="w-6 h-6 text-slate-400" />
-                </button>
-                <div className="hidden lg:flex w-8 h-8 bg-cyan-500/10 border border-cyan-500/20 rounded-lg items-center justify-center shadow-[0_0_10px_rgba(34,211,238,0.2)]">
-                  <Play className="w-4 h-4 text-blue-500 ml-0.5 fill-cyan-400/20" />
-                </div>
-                <h1 className="text-base lg:text-xl font-bold tracking-tight text-white uppercase lg:tracking-widest">
-                  Watch Party
-                </h1>
-              </div>
-            </div>
-
-            {/* Right Section: Mobile User Identity (Polished Compact Style) */}
-            <div className="flex lg:hidden items-center h-full">
-              <div className="flex items-center gap-1.5 bg-white/[0.05] backdrop-blur-md border border-white/10 pl-1 pr-2 py-1 rounded-lg h-9 shadow-lg shadow-black/20">
-                <div className="w-6.5 h-6.5 rounded-full border border-blue-500/50 flex items-center justify-center bg-[#050816] shrink-0 shadow-[0_0_10px_rgba(59,130,246,0.15)] ml-0.5">
-                  <AvatarIcon avatar={selectedAvatar} className="w-3.5 h-3.5 text-blue-400" />
-                </div>
-                <div className="flex items-center gap-1.5 overflow-hidden">
-                  <span className="text-[11px] font-bold text-white truncate leading-none tracking-tight">{username}</span>
-                  {role === 'HOST' && (
-                    <span className="bg-blue-600 text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-[3px] leading-none shadow-sm shadow-blue-900/20">
-                      HOST
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  if (role === 'HOST') {
-                    setShowHostLeaveModal(true);
-                  } else {
-                    navigate('/');
-                  }
-                }}
-                className="flex items-center justify-center ml-2 w-9 h-9 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors active:scale-95"
-                title="Leave Room"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Center Section: Desktop Controls */}
-            <div className="hidden lg:flex items-center gap-3 absolute left-1/2 -translate-x-1/2">
-              <div
-                className="flex items-center gap-3 bg-white/[0.02] border border-white/5 rounded-lg px-4 h-10 cursor-pointer hover:border-blue-500 hover:bg-blue-500/5 transition-all duration-200 group active:border-blue-400"
-                onClick={copyRoomId}
-              >
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Room ID</span>
-                <code className="text-[14px] font-mono text-blue-500 font-semibold tracking-tight">{roomId}</code>
-                <div className="w-px h-4 bg-white/10 mx-1" />
-                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />}
-              </div>
-
-              <button
-                onClick={copyRoomLink}
-                className="flex items-center gap-2 bg-white/[0.02] border border-white/5 rounded-lg px-4 h-10 hover:border-blue-500 hover:bg-blue-500/5 transition-all duration-200 group active:border-blue-400"
-              >
-                <Link className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                <span className="text-xs font-semibold text-gray-400 group-hover:text-gray-200 transition-colors">Copy Link</span>
-              </button>
-
-              <button
-                onClick={handleManualSync}
-                className="flex items-center gap-2 bg-white/[0.02] border border-white/5 rounded-lg px-4 h-10 hover:border-blue-500 hover:bg-blue-500/5 transition-all duration-200 group active:border-blue-400"
-              >
-                <div className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'Synced' ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`} />
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 group-hover:text-gray-200 transition-colors">{syncStatus}</span>
-                <RefreshCw className={`w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500 transition-colors ${syncStatus !== 'Synced' ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-
-            {/* Right Section: Desktop Profile & Actions */}
-            <div className="hidden lg:flex items-center gap-4">
-              <div className="flex items-center gap-2.5 bg-white/[0.02] border border-white/5 rounded-lg px-3 h-10 hover:border-blue-500 hover:bg-blue-500/5 transition-all duration-200 group">
-                <div className="w-7 h-7 rounded-full border border-blue-500/40 flex items-center justify-center bg-[#050816] shrink-0">
-                  <AvatarIcon avatar={selectedAvatar} className="w-3.5 h-3.5 text-blue-400 transition-colors" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-200 tracking-tight">{username}</span>
-                  {role === 'HOST' && (
-                    <span className="bg-blue-500/[0.12] text-blue-500 text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md leading-none">
-                      HOST
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  if (role === 'HOST') {
-                    setShowHostLeaveModal(true);
-                  } else {
-                    navigate('/');
-                  }
-                }}
-                className="flex items-center gap-2 px-4 h-10 ml-5 rounded-lg border border-red-500/20 bg-white/[0.02] text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all duration-200 text-xs font-semibold group"
-              >
-                <LogOut className="w-4 h-4 text-red-500/70 group-hover:text-red-500 transition-colors" />
-                <span>Leave Room</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile-only Room Code Badge Row */}
-        <div className="px-2 md:px-4 pb-1.5 md:pb-3 flex items-center justify-between lg:hidden">
-          <div
-            className="flex items-center gap-2 bg-[#0B0F1A] border border-white/5 rounded-lg px-3 py-1.5 cursor-pointer active:scale-95 transition-transform"
-            onClick={copyRoomId}
-          >
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">ROOM:</span>
-            <code className="text-xs font-mono text-blue-500 font-bold">{roomId}</code>
-            {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3 text-gray-400" />}
-          </div>
-
-          <button
-            onClick={copyRoomLink}
-            className="flex lg:hidden items-center gap-2 bg-[#0B0F1A] border border-white/5 rounded-lg px-3 py-1.5 active:scale-95 transition-transform"
-          >
-            <Link className="w-3 h-3 text-blue-500" />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Link</span>
-          </button>
-
-          <button
-            onClick={handleManualSync}
-            className="flex items-center gap-2 bg-[#0B0F1A] border border-white/5 rounded-lg px-3 py-1.5 active:scale-95 transition-transform"
-          >
-            <div className={`w-2 h-2 rounded-full ${syncStatus === 'Synced' ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`} />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{syncStatus}</span>
-            <RefreshCw className={`w-3 h-3 text-blue-500 ${syncStatus !== 'Synced' ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+      {/* Header - Navbar */}
+      <header className={`w-full z-30 transition-all duration-500 ease-in-out ${isKeyboardOpen ? 'h-0 opacity-0 overflow-hidden border-none' : 'h-auto opacity-100'}`}>
+        <Navbar
+          roomId={roomId}
+          username={username}
+          selectedAvatar={selectedAvatar}
+          role={role}
+          syncStatus={syncStatus}
+          copyRoomId={copyRoomId}
+          copyRoomLink={copyRoomLink}
+          handleManualSync={handleManualSync}
+          handleLeaveRoom={() => {
+            if (role === 'HOST') {
+              setShowHostLeaveModal(true);
+            } else {
+              navigate('/');
+            }
+          }}
+          copied={copied}
+        />
       </header>
 
-      <main className="flex-1 flex flex-col md:flex-row max-w-[1400px] 2xl:max-w-[1500px] mx-auto w-full px-2 md:px-4 lg:px-5 py-1.5 md:py-6 gap-1.5 md:gap-4 lg:gap-5 items-start md:items-stretch overflow-hidden md:max-h-[85dvh]">
-        {/* Video Section */}
-        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} md:aspect-auto md:flex-1 bg-black relative overflow-hidden group rounded-xl md:rounded-[32px] shadow-2xl border border-white/5 shrink-0 transition-all duration-500 ease-in-out`}>
+      <main className="flex-1 flex flex-col md:flex-row max-w-[1400px] 2xl:max-w-[1500px] mx-auto w-full px-2 md:px-4 lg:px-5 py-1.5 md:py-4 gap-2 md:gap-4 lg:gap-5 items-start md:items-stretch overflow-hidden md:max-h-[85dvh]">
+        {/* Video Section - Outer Player Container with Sketch Corners */}
+        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} md:aspect-auto md:flex-1 bg-[#0A0D1E] relative overflow-hidden group rounded-[24px] shadow-2xl border-2 border-white/10 shrink-0 transition-all duration-500 ease-in-out`}>
+          {/* Sketch doodle corners */}
+          <svg className="absolute top-2 left-2 z-10 w-5 h-5 text-amber-400 opacity-80 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+          </svg>
+          <svg className="absolute top-2 right-2 z-10 w-5 h-5 text-cyan-400 opacity-70 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M4 8L10 2M14 2L20 8" />
+          </svg>
+
+          {/* Iframe / ReactPlayer (Unchanged logic, controls & API) */}
           <ReactPlayer
             ref={playerRef}
             url={url}
@@ -470,266 +361,6 @@ const Room = () => {
           />
         </div>
 
-        {/* Chat Panel - Sidebar on Desktop, Bottom Sheet on Mobile */}
-        <div className="w-full md:w-[340px] lg:w-[380px] flex-1 md:flex-none flex flex-col bg-slate-900/90 backdrop-blur-2xl rounded-lg md:rounded-[32px] border border-white/10 shadow-2xl overflow-hidden relative transition-all duration-500 ease-in-out">
-          {/* Tabs Navigation */}
-          <div className="flex border-b border-white/5 bg-white/5 backdrop-blur-md sticky top-0 z-20 px-2 md:px-4 pt-2 md:pt-3">
-            <button
-              onClick={() => setActiveTab('chat')}
-              className={`flex-1 flex items-center justify-center gap-2 py-1 md:py-1.5 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'chat' ? 'text-blue-500' : 'text-gray-400'}`}
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              Chat
-              {activeTab === 'chat' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />}
-            </button>
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`flex flex-1 items-center justify-center gap-2 py-1 md:py-1.5 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'users' ? 'text-blue-500' : 'text-gray-400'}`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              Users ({users.length})
-              {activeTab === 'users' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />}
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-hidden relative flex flex-col">
-            {activeTab === 'chat' ? (
-              <>
-                <div
-                  ref={scrollRef}
-                  onScroll={handleChatScroll}
-                  className="flex-1 overflow-y-auto pt-2 md:pt-4 pb-2 md:pb-3 scroll-smooth custom-scrollbar relative"
-                >
-                  <div className="min-h-full flex flex-col justify-end">
-                    {messages.map((m, i) => {
-                    const isSystem = m.sender === 'System';
-                    const isMe = m.sender === username;
-                    const prevMsg = i > 0 ? messages[i - 1] : null;
-                    const isFirstInGroup = !prevMsg || prevMsg.sender !== m.sender || prevMsg.sender === 'System';
-
-                    if (isSystem) {
-                      return (
-                        <div key={i} className="flex justify-center py-1.5 md:py-3 animate-in fade-in duration-200 px-3 md:px-6">
-                          <span className="text-[11px] text-white/40 font-medium text-center">
-                            {m.text}
-                          </span>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div key={i} className={`flex ${isMe ? 'justify-end' : 'justify-start gap-2.5 items-start'} ${isFirstInGroup ? 'mt-[10px]' : 'mt-[4px]'} px-2 md:px-4 animate-in fade-in duration-200`}>
-                        {!isMe && (
-                          <div className="w-7 h-7 flex-shrink-0 mt-1">
-                            {isFirstInGroup ? (
-                              <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
-                                <AvatarIcon avatar={m.avatar} className="w-3.5 h-3.5 text-blue-400" />
-                              </div>
-                            ) : null}
-                          </div>
-                        )}
-
-                        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]`}>
-                          {isFirstInGroup && !isMe && (
-                            <span className="text-[11px] font-bold text-blue-400/80 mb-1 ml-1 opacity-60">
-                              {m.sender}
-                            </span>
-                          )}
-                          <div className={`px-3.5 py-2 rounded-xl text-sm leading-relaxed break-words whitespace-pre-wrap relative ${isMe
-                              ? 'bg-[#2563eb] text-white rounded-tr-none shadow-md shadow-blue-900/10'
-                              : 'bg-white/[0.08] text-[#e5e7eb] rounded-tl-none'
-                            }`}>
-                            {m.text}
-                            <span className="text-[9px] opacity-40 ml-2 float-right mt-1.5 font-medium">
-                              {formatTime(m.timestamp)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div ref={chatEndRef} />
-                  </div>
-                </div>
-
-                {/* New Messages Indicator */}
-                {showScrollIndicator && (
-                  <button
-                    onClick={() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })}
-                    className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-2 hover:bg-indigo-500 transition-all active:scale-95"
-                  >
-                    <ChevronLeft className="w-3 h-3 rotate-[270deg]" /> New Messages
-                  </button>
-                )}
-
-                {/* Chat Input */}
-                <div className="p-2 md:p-4 bg-white/5 border-t border-white/5 backdrop-blur-md sticky bottom-0 z-20">
-                  <form onSubmit={sendChatMessage} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      className="flex-1 bg-white/5 border border-white/10 py-1.5 md:py-3.5 px-3 md:px-3.5 rounded-full outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-xs md:text-sm placeholder:text-gray-400 text-white shadow-inner backdrop-blur-md"
-                      placeholder="Type a message..."
-                    />
-                    <button
-                      type="submit"
-                      className="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-indigo-500 hover:to-cyan-500 text-white rounded-full transition-all flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] active:scale-90"
-                    >
-                      <Send className="w-5 h-5" />
-                    </button>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 overflow-y-auto px-2 md:px-4 py-3 md:py-6 space-y-1.5 custom-scrollbar">
-                <div className="flex items-center justify-between mb-6 px-1">
-                  <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                    <Users className="w-3 h-3 text-blue-500" />
-                    Participants
-                  </div>
-                  <span className="text-[10px] font-black bg-white/5 border border-white/5 px-2 py-0.5 rounded-md text-slate-400">
-                    {users.length}
-                  </span>
-                </div>
-
-                {/* Current User Info for Mobile */}
-                <div className="lg:hidden mb-4 md:mb-8 p-3 md:p-4 bg-indigo-500/10 rounded-xl md:rounded-2xl border border-blue-500/20 shadow-lg animate-in fade-in slide-in-from-top-2">
-                  <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <User className="w-3 h-3 text-blue-500" />
-                    My Identity
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center shadow-xl">
-                      <AvatarIcon avatar={selectedAvatar} className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-white">{username}</span>
-                      <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">{role}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {users.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Users className="w-10 h-10 text-slate-800 mx-auto mb-3 opacity-20" />
-                    <p className="text-xs font-bold text-gray-400">No users in room</p>
-                  </div>
-                ) : (
-                  users.map((u, i) => {
-                    const isMe = u.name === username;
-                    const isUserHost = u.isHost;
-
-                    return (
-                      <div key={i} className="flex flex-col">
-                        <div
-                          className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-200 animate-in fade-in slide-in-from-right-2 duration-300 ${isMe ? 'bg-indigo-500/5 ring-1 ring-white/5' : 'hover:bg-white/5'}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="relative">
-                              <div className={`w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-white shadow-xl shadow-black/20 border border-white/10`}>
-                                <AvatarIcon avatar={u.avatar} className="w-4 h-4 text-blue-500" />
-                              </div>
-                              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#111827] rounded-full flex items-center justify-center">
-                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_5px_rgba(34,197,94,0.6)]" />
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col gap-0.5">
-                              <div className="flex items-center gap-2">
-                                <span className={`text-[13px] font-bold tracking-tight ${isMe ? 'text-white' : 'text-gray-200 group-hover:text-white transition-colors'}`}>
-                                  {isMe ? `You (${u.name})` : u.name}
-                                </span>
-                                {isUserHost && (
-                                  <div className="flex items-center gap-1 bg-indigo-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-md">
-                                    <Shield className="w-2.5 h-2.5 text-blue-500" />
-                                    <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter">Host</span>
-                                  </div>
-                                )}
-                              </div>
-                              <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest">
-                                {isUserHost ? 'Moderator' : 'Viewer'}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Host Actions */}
-                          {role === 'HOST' && !isUserHost && (
-                            <div className="relative z-50">
-                              {/* Desktop Hover Button */}
-                              <button
-                                onClick={() => handleTransferHost(u.id)}
-                                className="hidden lg:flex opacity-0 group-hover:opacity-100 transition-all bg-[#0B0F1A] hover:bg-indigo-600 border border-white/10 hover:border-blue-500 text-[9px] font-black uppercase tracking-tighter text-slate-400 hover:text-white px-2.5 py-1.5 rounded-lg active:scale-95 items-center gap-1.5"
-                                title={`Make ${u.name} Host`}
-                              >
-                                <ArrowRight className="w-3 h-3" />
-                                Make Host
-                              </button>
-
-                              {/* Mobile 3-Dot Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenUserMenuId(openUserMenuId === u.id ? null : u.id);
-                                }}
-                                className="lg:hidden p-1.5 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Inline Mobile Menu to avoid clipping */}
-                        {role === 'HOST' && !isUserHost && openUserMenuId === u.id && (
-                          <div className="lg:hidden px-3 pb-3 animate-in slide-in-from-top-2 duration-200">
-                            <button
-                              onClick={() => {
-                                handleTransferHost(u.id);
-                                setOpenUserMenuId(null);
-                              }}
-                              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-left text-[10px] font-black text-white hover:bg-indigo-600 flex items-center gap-3 uppercase tracking-widest transition-colors"
-                            >
-                              <Shield className="w-4 h-4 text-blue-500" />
-                              Make Host
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-
-                {role === 'HOST' && (
-                  <div className="px-1 mt-4">
-                    <button
-                      onClick={() => setIsModalOpen(true)}
-                      className="w-full py-4 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-indigo-600/20 active:scale-95 flex items-center justify-center gap-3"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Change Video
-                    </button>
-                  </div>
-                )}
-
-                {/* Additional Room Info or Help */}
-                <div className="pt-8 px-1">
-                  <div className="p-4 bg-indigo-500/5 rounded-2xl border border-blue-500/10">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-6 h-6 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                        <Play className="w-3 h-3 text-blue-500" />
-                      </div>
-                      <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Host Controls</span>
-                    </div>
-                    <p className="text-[10px] text-gray-400 leading-relaxed font-medium">
-                      The Host controls the global playback, video source, and can transfer their role to any other participant.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
       </main>
 
       {/* Mobile Participants Bottom Sheet */}
