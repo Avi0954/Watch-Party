@@ -67,7 +67,7 @@ const ChatSidebar = ({
 
   return (
     <div className="w-full md:w-[340px] lg:w-[380px] flex-1 md:flex-none flex flex-col bg-[#0A0D1F] border-2 border-[#1E2442] rounded-[30px] shadow-2xl overflow-hidden relative transition-all duration-300">
-      
+
       {/* Decorative Edge Doodles */}
       <svg className="absolute top-2 left-3 w-4 h-4 text-purple-400 opacity-40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M4 12 C 8 8, 16 16, 20 12" />
@@ -80,9 +80,8 @@ const ChatSidebar = ({
       <div className="flex border-b border-[#1E2442] bg-[#0A0D1F] px-4 pt-3.5 pb-2.5 items-center justify-around relative z-20 select-none">
         <button
           onClick={() => setActiveTab('chat')}
-          className={`flex-1 flex items-center justify-center gap-2 py-1.5 font-handdrawn text-base uppercase tracking-wider transition-all relative ${
-            activeTab === 'chat' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-1.5 font-handdrawn text-base uppercase tracking-wider transition-all relative ${activeTab === 'chat' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'
+            }`}
         >
           <MessageSquare className={`w-4 h-4 ${activeTab === 'chat' ? 'text-[#F43F5E]' : 'text-slate-400'}`} />
           <span>CHAT</span>
@@ -104,9 +103,8 @@ const ChatSidebar = ({
 
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex-1 flex items-center justify-center gap-2 py-1.5 font-handdrawn text-base uppercase tracking-wider transition-all relative ${
-            activeTab === 'users' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-1.5 font-handdrawn text-base uppercase tracking-wider transition-all relative ${activeTab === 'users' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'
+            }`}
         >
           <Users className={`w-4 h-4 ${activeTab === 'users' ? 'text-[#F43F5E]' : 'text-slate-400'}`} />
           <span>USERS ({users.length})</span>
@@ -141,7 +139,7 @@ const ChatSidebar = ({
                   const isSystem = m.sender === 'System';
                   const theme = getSenderTheme(m.sender, i);
 
-                  {/* System Join / Announcement Note Pill */}
+                  {/* System Join / Announcement Note Pill */ }
                   if (isSystem) {
                     return (
                       <div key={i} className="flex justify-center py-2 animate-in fade-in duration-200">
@@ -304,11 +302,10 @@ const ChatSidebar = ({
                 return (
                   <div key={i} className="flex flex-col">
                     <div
-                      className={`group flex items-center justify-between p-3 rounded-2xl border-2 transition-all ${
-                        isMe
+                      className={`group flex items-center justify-between p-3 rounded-2xl border-2 transition-all ${isMe
                           ? 'bg-[#121633] border-purple-500/50 shadow-md'
                           : 'bg-[#0D1026] border-[#242C54] hover:border-slate-600'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="relative">
