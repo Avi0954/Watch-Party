@@ -133,8 +133,8 @@ const Navbar = ({
         </button>
 
         {/* Synced Green Sketch Pill */}
-        <div className="bg-[#062C1B]/90 border-2 border-[#10B981] rounded-full px-4 py-1.5 flex items-center gap-2 shadow-[0_0_12px_rgba(16,185,129,0.3)]">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#00FF87] shadow-[0_0_8px_#00FF87]"></span>
+        <div className="bg-[#040E0A] border-2 border-[#10B981] rounded-[18px] px-3.5 py-1.5 flex items-center gap-2 text-[#10B981]">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shrink-0"></span>
           <span className="text-xs font-black font-handdrawn uppercase tracking-wider text-[#10B981]">
             {syncStatus?.toUpperCase() || 'SYNCED'}
           </span>
@@ -215,9 +215,9 @@ const Navbar = ({
 
         <button
           onClick={handleManualSync}
-          className="bg-[#062C1B] border-2 border-[#10B981] rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-black font-handdrawn text-[#10B981] active:scale-95 transition-transform"
+          className="bg-[#040E0A] border-2 border-[#10B981] rounded-[16px] px-3 py-1 flex items-center gap-1.5 text-xs font-black font-handdrawn text-[#10B981] active:scale-95 transition-transform"
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-[#00FF87]"></span>
+          <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
           <span className="text-[10px] uppercase">{syncStatus}</span>
           <RefreshCw className={`w-3 h-3 text-[#10B981] ${syncStatus !== 'Synced' ? 'animate-spin' : ''}`} />
         </button>
