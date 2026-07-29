@@ -77,48 +77,52 @@ const ChatSidebar = ({
       </svg>
 
       {/* Top Tabs Navigation */}
-      <div className="flex border-b border-[#1E2442] bg-[#0A0D1F] px-4 pt-3.5 pb-2.5 items-center justify-around relative z-20 select-none">
+      <div className="flex border-b border-slate-800/80 bg-[#070914] px-5 pt-4 pb-3 items-center gap-8 relative z-20 select-none font-handdrawn">
         <button
           onClick={() => setActiveTab('chat')}
-          className={`flex-1 flex items-center justify-center gap-2 py-1.5 font-handdrawn text-base uppercase tracking-wider transition-all relative ${activeTab === 'chat' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+          className={`flex items-center gap-2.5 py-1 font-handdrawn text-base uppercase tracking-wider transition-all relative ${
+            activeTab === 'chat' ? 'text-white font-black' : 'text-slate-400 hover:text-slate-200 font-bold'
+          }`}
         >
-          <MessageSquare className={`w-4 h-4 ${activeTab === 'chat' ? 'text-[#F43F5E]' : 'text-slate-400'}`} />
+          <MessageSquare className={`w-5 h-5 ${activeTab === 'chat' ? 'text-[#EC4899] fill-[#EC4899]/15' : 'text-slate-400'}`} />
           <span>CHAT</span>
 
-          {/* Active Tab Hand-Drawn Pink Underline Curve */}
+          {/* Active Tab Hand-Drawn Pink Scribble Marker Underline */}
           {activeTab === 'chat' && (
             <svg
-              className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-14 h-2.5 text-[#F43F5E] overflow-visible pointer-events-none"
-              viewBox="0 0 60 10"
+              className="absolute -bottom-2.5 -left-1 w-28 h-3 text-[#EC4899] overflow-visible pointer-events-none"
+              viewBox="0 0 100 12"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.8"
+              strokeWidth="3.2"
               strokeLinecap="round"
             >
-              <path d="M 2 5 C 16 1, 44 8, 58 4" />
+              <path d="M 2 5 C 30 2, 70 8, 98 4" />
+              <path d="M 4 8 C 32 6, 68 9, 95 7" opacity="0.8" strokeWidth="2.4" />
             </svg>
           )}
         </button>
 
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex-1 flex items-center justify-center gap-2 py-1.5 font-handdrawn text-base uppercase tracking-wider transition-all relative ${activeTab === 'users' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+          className={`flex items-center gap-2.5 py-1 font-handdrawn text-base uppercase tracking-wider transition-all relative ${
+            activeTab === 'users' ? 'text-white font-black' : 'text-slate-400 hover:text-slate-200 font-bold'
+          }`}
         >
-          <Users className={`w-4 h-4 ${activeTab === 'users' ? 'text-[#F43F5E]' : 'text-slate-400'}`} />
+          <Users className={`w-5 h-5 ${activeTab === 'users' ? 'text-[#EC4899]' : 'text-slate-400'}`} />
           <span>USERS ({users.length})</span>
 
           {activeTab === 'users' && (
             <svg
-              className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-16 h-2.5 text-[#F43F5E] overflow-visible pointer-events-none"
-              viewBox="0 0 70 10"
+              className="absolute -bottom-2.5 -left-1 w-32 h-3 text-[#EC4899] overflow-visible pointer-events-none"
+              viewBox="0 0 110 12"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.8"
+              strokeWidth="3.2"
               strokeLinecap="round"
             >
-              <path d="M 2 5 C 20 1, 50 8, 68 4" />
+              <path d="M 2 5 C 35 2, 75 8, 108 4" />
+              <path d="M 4 8 C 38 6, 72 9, 105 7" opacity="0.8" strokeWidth="2.4" />
             </svg>
           )}
         </button>
