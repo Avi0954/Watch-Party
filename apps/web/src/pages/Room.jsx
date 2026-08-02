@@ -50,11 +50,12 @@ const Room = () => {
   });
 
   const [inputMessage, setInputMessage] = useState('');
-  const [url, setUrl] = useState('https://www.youtube.com/watch?v=aqz-KE-bpKQ');
+  const [url, setUrl] = useState('https://youtu.be/wBw9EPtDLw8?si=_UhB7wTCxQJ-frYk');
   const [playing, setPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHostLeaveModal, setShowHostLeaveModal] = useState(false);
+  const [isMobileUsersOpen, setIsMobileUsersOpen] = useState(false);
   const [newUrlInput, setNewUrlInput] = useState('');
   const [activeTab, setActiveTab] = useState('chat');
   const [toasts, setToasts] = useState([]);
@@ -137,7 +138,7 @@ const Room = () => {
     setToasts(prev => [...prev, { id, message }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3000);
+    }, 2500);
   };
 
   // Monitor for joins
@@ -172,8 +173,22 @@ const Room = () => {
     return () => {
       window.visualViewport.removeEventListener('resize', handleResize);
       window.visualViewport.removeEventListener('scroll', handleResize);
+      handleResize();
     };
   }, []);
+
+  // Escape key handler for accessible modal closing
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (isModalOpen) setIsModalOpen(false);
+        if (showHostLeaveModal) setShowHostLeaveModal(false);
+        if (isMobileUsersOpen) setIsMobileUsersOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen, showHostLeaveModal, isMobileUsersOpen]);
 
   const sendChatMessage = (e) => {
     e.preventDefault();
@@ -186,7 +201,7 @@ const Room = () => {
   const copyRoomId = () => {
     navigator.clipboard.writeText(roomId);
     setCopied(true);
-    showToast("Room ID copied to clipboard!");
+    showToast("✓ Room ID copied!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -194,7 +209,7 @@ const Room = () => {
     const link = window.location.origin + "/room/" + roomId;
     try {
       await navigator.clipboard.writeText(link);
-      showToast("Link copied to clipboard!");
+      showToast("✓ Link copied!");
     } catch (error) {
       showToast("Error copying link");
     }
@@ -227,12 +242,11 @@ const Room = () => {
       handleVideoChange(url);
       setIsModalOpen(false);
       setNewUrlInput('');
-      showToast("Video synced for everyone!");
+      showToast("✓ Video synced for everyone!");
     }
   };
 
   if (!token) {
-    alert("Invalid session. Please create a new room.");
     navigate('/');
     return null;
   }
@@ -287,8 +301,6 @@ const Room = () => {
     );
   }
 
-  const [isMobileUsersOpen, setIsMobileUsersOpen] = useState(false);
-
   return (
     <div
       className="flex flex-col bg-[#090B18] text-white overflow-hidden font-handdrawn selection:bg-purple-500/30 relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#131938] via-[#090B18] to-[#050711]"
@@ -313,6 +325,7 @@ const Room = () => {
           copyRoomId={copyRoomId}
           copyRoomLink={copyRoomLink}
           handleManualSync={handleManualSync}
+          onOpenChangeVideo={() => setIsModalOpen(true)}
           handleLeaveRoom={() => {
             if (role === 'HOST') {
               setShowHostLeaveModal(true);
@@ -326,7 +339,7 @@ const Room = () => {
 
       <main className="flex-1 flex flex-col md:flex-row max-w-[1400px] 2xl:max-w-[1500px] mx-auto w-full px-2 md:px-4 lg:px-5 py-1.5 md:py-4 gap-2 md:gap-4 lg:gap-5 items-start md:items-stretch overflow-hidden md:max-h-[85dvh]">
         {/* Video Section - Outer Player Container with Sketch Corners */}
-        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} md:aspect-auto md:flex-1 bg-[#0A0D1E] relative overflow-hidden group rounded-[24px] shadow-2xl border-2 border-white/10 shrink-0 transition-all duration-500 ease-in-out`}>
+        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} md:aspect-auto md:flex-1 bg-[#0A0D1E] relative overflow-hidden group rounded-[24px] border border-white/15 ring-1 ring-inset ring-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_25px_rgba(139,92,246,0.12)] shrink-0 transition-all duration-500 ease-in-out`}>
           {/* Sketch doodle corners */}
           <svg className="absolute top-2 left-2 z-10 w-5 h-5 text-amber-400 opacity-80 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
@@ -415,82 +428,31 @@ const Room = () => {
                 const isUserHost = u.isHost;
 
                 return (
-                  <div key={i} className="flex flex-col">
-                    <div
-                      className={`flex items-center justify-between p-4 rounded-2xl transition-all ${isMe ? 'bg-indigo-500/10 border border-blue-500/20' : 'bg-white/5 border border-white/10'}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div className={`w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center shadow-lg border border-white/10`}>
-                            <AvatarIcon avatar={u.avatar} className="w-5 h-5 text-blue-500" />
-                          </div>
-                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#050816]" />
-                        </div>
-
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm font-bold ${isMe ? 'text-white' : 'text-gray-200'}`}>
-                              {isMe ? `You (${u.name})` : u.name}
-                            </span>
-                            {isUserHost && (
-                              <div className="bg-indigo-500/20 border border-blue-500/30 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                                <Shield className="w-2.5 h-2.5 text-blue-500" />
-                                <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter">Host</span>
-                              </div>
-                            )}
-                          </div>
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                            {isUserHost ? 'Moderator' : 'Viewer'}
-                          </span>
-                        </div>
+                  <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                        <AvatarIcon avatar={u.avatar || 'ghost'} className="w-5 h-5 text-white" />
                       </div>
-
-                      {role === 'HOST' && !isUserHost && (
-                        <div className="relative z-50">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenUserMenuId(openUserMenuId === u.id ? null : u.id);
-                            }}
-                            className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
-                          >
-                            <MoreVertical className="w-5 h-5" />
-                          </button>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-white">{u.name}</span>
+                          {isMe && <span className="text-[10px] text-slate-500 font-bold">(You)</span>}
                         </div>
-                      )}
+                        <span className="text-xs text-slate-500">{isUserHost ? 'Room Host' : 'Viewer'}</span>
+                      </div>
                     </div>
-
-                    {/* Inline Mobile Menu */}
-                    {role === 'HOST' && !isUserHost && openUserMenuId === u.id && (
-                      <div className="px-2 pt-1 pb-3 animate-in slide-in-from-top-2 duration-200">
-                        <button
-                          onClick={() => {
-                            handleTransferHost(u.id);
-                            setOpenUserMenuId(null);
-                          }}
-                          className="w-full px-4 py-4 bg-indigo-600/20 border border-indigo-500/30 rounded-xl text-left text-[10px] font-black text-white hover:bg-indigo-600 flex items-center gap-3 uppercase tracking-widest transition-colors"
-                        >
-                          <Shield className="w-4 h-4 text-blue-500" />
-                          Make Host
-                        </button>
-                      </div>
+                    {role === 'HOST' && !isMe && (
+                      <button
+                        onClick={() => handleTransferHost(u.userId)}
+                        className="px-3 py-1.5 bg-white/5 hover:bg-indigo-500/20 hover:border-indigo-500/40 border border-white/10 text-xs font-bold text-slate-300 hover:text-white rounded-xl transition-all"
+                      >
+                        Make Host
+                      </button>
                     )}
                   </div>
                 );
               })}
             </div>
-
-            {role === 'HOST' && (
-              <div className="px-6 py-4 border-t border-white/5 bg-white/5 backdrop-blur-md">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="w-full py-5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] active:scale-95 flex items-center justify-center gap-3"
-                >
-                  <Settings className="w-5 h-5" />
-                  Change Video
-                </button>
-              </div>
-            )}
 
             {/* Bottom padding for mobile home indicator */}
             <div className="h-8 w-full" />
@@ -498,49 +460,120 @@ const Room = () => {
         </div>
       )}
 
-      {/* Toasts Container */}
-      <div className="fixed top-24 right-4 lg:right-12 z-[60] flex flex-col gap-3 w-[90%] max-w-sm pointer-events-none">
+      {/* Modern Floating Toasts Container (Top-Right) */}
+      <div className="fixed top-6 right-4 sm:right-8 z-[120] flex flex-col gap-2.5 max-w-sm pointer-events-none">
         {toasts.map(t => (
-          <div key={t.id} className="bg-gradient-to-r from-[#0B0F1A] to-[#050816] text-white text-xs font-bold px-6 py-4 rounded-2xl shadow-2xl border border-blue-500/30 flex items-center gap-3 animate-in slide-in-from-right-8 duration-500 backdrop-blur-xl">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            {t.message}
+          <div
+            key={t.id}
+            className="bg-[#0C1024]/95 text-white font-handdrawn text-xs font-black px-4 py-2.5 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(139,92,246,0.3)] border-2 border-purple-500/40 flex items-center gap-2.5 animate-in slide-in-from-top-4 fade-in duration-200 backdrop-blur-md"
+          >
+            <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center shrink-0">
+              <Check className="w-3 h-3 text-emerald-400" />
+            </div>
+            <span className="leading-snug">{t.message}</span>
           </div>
         ))}
       </div>
 
-      {/* Change Video Modal */}
+      {/* Redesigned Sync New Video Modal (Minimalist Fun-Chaos) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[#050816]/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsModalOpen(false)} />
-          <div className="relative w-full max-w-lg bg-gradient-to-b from-[#0B0F1A] to-[#050816] backdrop-blur-xl border border-white/10 rounded-[40px] shadow-2xl p-8 lg:p-10 animate-in zoom-in fade-in duration-300">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-bold">Sync New Video</h2>
-                <p className="text-xs text-gray-400 font-medium">Update the playback for everyone in the room</p>
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onKeyDown={(e) => e.key === 'Escape' && setIsModalOpen(false)}
+        >
+          {/* Backdrop with 16px blur & smooth fade */}
+          <div
+            className="absolute inset-0 bg-[#050816]/80 backdrop-blur-md transition-opacity duration-200"
+            onClick={() => setIsModalOpen(false)}
+          />
+
+          {/* Modal Card */}
+          <div className="relative w-full max-w-md bg-[#080B1C] border-2 border-purple-500/30 rounded-[32px] shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_35px_rgba(139,92,246,0.2)] p-7 sm:p-8 font-handdrawn overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+
+            {/* Subtle Playful Corner Doodles */}
+            {/* 1. Small Yellow Sparkle top-left */}
+            <svg
+              className="absolute top-4 left-5 w-4 h-4 text-amber-400 opacity-75 pointer-events-none animate-sparkle-pulse"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
+              <path d="M12 3v18M3 12h18M6 6l12 12M6 18L18 6" />
+            </svg>
+
+            {/* 2. Tiny Cyan Floating Dot top-right */}
+            <div className="absolute top-6 right-16 w-2 h-2 rounded-full bg-cyan-400/60 shadow-[0_0_8px_#22D3EE] pointer-events-none" />
+
+            {/* 3. Small Outlined Purple Star bottom-right */}
+            <svg
+              className="absolute bottom-4 right-5 w-5 h-5 text-purple-400/40 pointer-events-none"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+            </svg>
+
+            {/* Header */}
+            <div className="flex items-start justify-between mb-7">
+              <div className="flex flex-col gap-1 pr-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎬</span>
+                  <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-wider font-handdrawn">
+                    Sync New Video
+                  </h2>
+                </div>
+                <p className="text-xs text-slate-400 font-medium font-handdrawn">
+                  Start a new video for everyone in the room.
+                </p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/5 rounded-2xl transition-colors">
-                <X className="w-6 h-6 text-slate-400" />
+
+              {/* Compact Rounded Close Button */}
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-purple-500/20 text-slate-400 hover:text-white border border-white/10 hover:border-purple-400/50 hover:shadow-[0_0_12px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center cursor-pointer shrink-0"
+                title="Close (Esc)"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={triggerVideoChange} className="space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-1">Paste Link</label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={newUrlInput}
-                  onChange={(e) => setNewUrlInput(e.target.value)}
-                  className="w-full bg-[#050816]/50 backdrop-blur-sm border border-white/10 p-5 rounded-3xl outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all text-sm shadow-inner placeholder:text-gray-400"
-                  placeholder="YouTube, Vimeo, Twitch, or Direct URL..."
-                />
+            {/* Form */}
+            <form onSubmit={triggerVideoChange} className="space-y-6">
+              {/* Paste Link Field */}
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-wider text-slate-300 font-handdrawn flex items-center gap-1.5 pl-1">
+                  <span>VIDEO LINK</span>
+                </label>
+
+                <div className="relative flex items-center h-[52px] bg-[#050714]/80 border-2 border-slate-700/80 hover:border-slate-600 focus-within:border-cyan-400 focus-within:shadow-[0_0_16px_rgba(34,211,238,0.35)] rounded-2xl px-3.5 transition-all">
+                  <Link className="w-4 h-4 text-slate-400 group-focus-within:text-cyan-400 shrink-0 mr-2.5 transition-colors" />
+                  <input
+                    autoFocus
+                    type="text"
+                    value={newUrlInput}
+                    onChange={(e) => setNewUrlInput(e.target.value)}
+                    className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 font-handdrawn outline-none"
+                    placeholder="Paste a YouTube, Vimeo, or direct video URL..."
+                  />
+                </div>
               </div>
-              <button
-                type="submit"
-                className="w-full py-5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_25px_rgba(34,211,238,0.4)] flex items-center justify-center gap-3 active:scale-95"
-              >
-                Apply Sync
-              </button>
+
+              {/* CTA Button: 60-70% width, Center Aligned */}
+              <div className="flex justify-center pt-1">
+                <button
+                  type="submit"
+                  className="w-2/3 max-w-[260px] py-3.5 bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#7C3AED] hover:to-[#6D28D9] text-white border-2 border-purple-300/40 rounded-2xl font-black font-handdrawn text-xs uppercase tracking-widest shadow-[0_0_18px_rgba(139,92,246,0.4)] hover:shadow-[0_0_24px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Sync Video</span>
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -570,7 +603,7 @@ const Room = () => {
               >
                 Transfer Host
               </button>
-              
+
               <button
                 onClick={() => {
                   handleEndRoom();
@@ -581,7 +614,7 @@ const Room = () => {
               >
                 End Room for All
               </button>
-              
+
               <button
                 onClick={() => setShowHostLeaveModal(false)}
                 className="w-full py-4 text-gray-500 hover:text-gray-300 font-bold text-sm transition-all"

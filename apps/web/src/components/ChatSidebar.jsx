@@ -66,60 +66,60 @@ const ChatSidebar = ({
   };
 
   return (
-    <div className="w-full md:w-[340px] lg:w-[380px] flex-1 md:flex-none flex flex-col bg-[#070914] border-2 border-slate-700/60 rounded-[24px] shadow-2xl overflow-hidden relative select-none font-handdrawn transition-all duration-300">
-      
-      {/* Outer Sketched Frame Accent SVG */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-30 opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <rect x="1" y="1" width="98" height="98" rx="6" fill="none" stroke="white" strokeWidth="0.6" strokeDasharray="100 2 60 2" />
+    <div className="w-full md:w-[340px] lg:w-[380px] flex-1 md:flex-none flex flex-col bg-[#070914] rounded-[24px] shadow-2xl overflow-hidden relative select-none font-handdrawn transition-all duration-300">
+
+      {/* Outer Sketched Frame Accent SVG (Doodle Frame) */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-30 opacity-40" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <rect x="1" y="1" width="98" height="98" rx="6" fill="none" stroke="white" strokeWidth="0.8" strokeDasharray="100 2 60 2" />
       </svg>
 
       {/* Top Tabs Navigation - Centered & Equal Width Alignment */}
       <div className="flex border-b border-slate-800/80 bg-[#070914] px-4 pt-3 pb-2.5 items-center justify-around relative z-20 select-none font-handdrawn">
         <button
           onClick={() => setActiveTab('chat')}
-          className={`flex-1 flex items-center justify-center gap-2 py-1 font-handdrawn text-sm uppercase tracking-wider transition-all relative ${
-            activeTab === 'chat' ? 'text-white font-black' : 'text-slate-400 hover:text-slate-200 font-bold'
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-1 font-handdrawn text-sm uppercase tracking-wider transition-all relative ${activeTab === 'chat' ? 'text-white font-black' : 'text-slate-400 hover:text-slate-200 font-bold'
+            }`}
         >
-          <MessageSquare className={`w-4 h-4 ${activeTab === 'chat' ? 'text-[#EC4899] fill-[#EC4899]/15' : 'text-slate-400'}`} />
+          <MessageSquare className={`w-4 h-4 ${activeTab === 'chat' ? 'text-white' : 'text-slate-400'}`} />
           <span>CHAT</span>
 
-          {/* Active Tab Hand-Drawn Pink Scribble Marker Underline */}
+          {/* Active Tab Hand-Drawn Soft Pink Scribble Marker Underline */}
           {activeTab === 'chat' && (
             <svg
-              className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-16 h-2.5 text-[#EC4899] overflow-visible pointer-events-none"
-              viewBox="0 0 70 10"
+              className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-[72px] h-2.5 text-[#F472B6] overflow-visible pointer-events-none drop-shadow-[0_0_5px_rgba(244,114,182,0.45)]"
+              viewBox="0 0 74 10"
               fill="none"
               stroke="currentColor"
-              strokeWidth="3"
+              strokeWidth="2.5"
               strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <path d="M 2 5 C 20 2, 50 8, 68 4" />
-              <path d="M 4 8 C 22 6, 48 9, 65 7" opacity="0.8" strokeWidth="2.2" />
+              <path d="M 2 5 C 22 2.5, 52 7.5, 72 4.5" />
+              <path d="M 5 8 C 24 6, 50 8.5, 69 7" opacity="0.75" strokeWidth="2" />
             </svg>
           )}
         </button>
 
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex-1 flex items-center justify-center gap-2 py-1 font-handdrawn text-sm uppercase tracking-wider transition-all relative ${
-            activeTab === 'users' ? 'text-white font-black' : 'text-slate-400 hover:text-slate-200 font-bold'
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-1 font-handdrawn text-sm uppercase tracking-wider transition-all relative ${activeTab === 'users' ? 'text-white font-black' : 'text-slate-400 hover:text-slate-200 font-bold'
+            }`}
         >
-          <Users className={`w-4 h-4 ${activeTab === 'users' ? 'text-[#EC4899]' : 'text-slate-400'}`} />
+          <Users className={`w-4 h-4 ${activeTab === 'users' ? 'text-white' : 'text-slate-400'}`} />
           <span>USERS ({users.length})</span>
 
           {activeTab === 'users' && (
             <svg
-              className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-20 h-2.5 text-[#EC4899] overflow-visible pointer-events-none"
-              viewBox="0 0 80 10"
+              className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-[92px] h-2.5 text-[#F472B6] overflow-visible pointer-events-none drop-shadow-[0_0_5px_rgba(244,114,182,0.45)]"
+              viewBox="0 0 94 10"
               fill="none"
               stroke="currentColor"
-              strokeWidth="3"
+              strokeWidth="2.5"
               strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <path d="M 2 5 C 25 2, 55 8, 78 4" />
-              <path d="M 4 8 C 28 6, 52 9, 75 7" opacity="0.8" strokeWidth="2.2" />
+              <path d="M 2 5 C 28 2.5, 66 7.5, 92 4.5" />
+              <path d="M 5 8 C 30 6, 62 8.5, 89 7" opacity="0.75" strokeWidth="2" />
             </svg>
           )}
         </button>
@@ -158,85 +158,101 @@ const ChatSidebar = ({
               onScroll={handleChatScroll}
               className="flex-1 overflow-y-auto px-3.5 py-3 space-y-2.5 scroll-smooth custom-scrollbar relative z-10"
             >
-              <div className="min-h-full flex flex-col justify-end space-y-2.5">
-                {messages.map((m, i) => {
-                  const isSystem = m.sender === 'System';
-                  const theme = getSenderTheme(m.sender, i);
+              {messages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2.5 select-none opacity-80 animate-in fade-in duration-300">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border-2 border-purple-500/20 flex items-center justify-center text-2xl rotate-3 shadow-[0_0_15px_rgba(139,92,246,0.15)] mb-0.5">
+                    💬
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-black font-handdrawn uppercase tracking-wider text-slate-300">
+                      No messages yet
+                    </p>
+                    <p className="text-[11px] font-handdrawn text-slate-400">
+                      Start the conversation!
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="min-h-full flex flex-col justify-end space-y-2.5">
+                  {messages.map((m, i) => {
+                    const isSystem = m.sender === 'System';
+                    const theme = getSenderTheme(m.sender, i);
 
-                  {/* System Join / Announcement Note Banner */}
-                  if (isSystem) {
+                    {/* System Join / Announcement Note Banner */ }
+                    if (isSystem) {
+                      return (
+                        <div key={i} className="flex justify-center py-1 animate-in fade-in duration-200">
+                          <div className="relative inline-flex items-center">
+                            {/* Radiating yellow spark doodle */}
+                            <svg
+                              className="absolute -top-2.5 -right-2.5 w-3.5 h-3.5 text-amber-400 pointer-events-none"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                            >
+                              <path d="M4 10L1 8" />
+                              <path d="M8 4L6 1" />
+                            </svg>
+
+                            <div className="bg-[#FFD600] text-slate-950 font-handdrawn font-black px-3.5 py-1 rounded-lg border-2 border-slate-950 shadow-md rotate-[-1deg] text-[11px] flex items-center gap-1.5">
+                              <span>{m.text}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
-                      <div key={i} className="flex justify-center py-1 animate-in fade-in duration-200">
-                        <div className="relative inline-flex items-center">
-                          {/* Radiating yellow spark doodle */}
-                          <svg
-                            className="absolute -top-2.5 -right-2.5 w-3.5 h-3.5 text-amber-400 pointer-events-none"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200 group relative z-10"
+                      >
+                        {/* Avatar Circle with Sketched Theme Ring */}
+                        <div className="relative shrink-0 mt-0.5">
+                          <div
+                            className={`w-8 h-8 rounded-full bg-[#0D1026] border-2 ${theme.border} flex items-center justify-center shadow-md relative`}
                           >
-                            <path d="M4 10L1 8" />
-                            <path d="M8 4L6 1" />
-                          </svg>
+                            <AvatarIcon avatar={m.avatar || 'ghost'} className="w-4 h-4 text-white" />
+                          </div>
+                        </div>
 
-                          <div className="bg-[#FFD600] text-slate-950 font-handdrawn font-black px-3.5 py-1 rounded-lg border-2 border-slate-950 shadow-md rotate-[-1deg] text-[11px] flex items-center gap-1.5">
-                            <span>{m.text}</span>
+                        {/* Hand-Drawn Sketch Speech Bubble */}
+                        <div className="flex-1 min-w-0 relative">
+                          {/* Pointer Tail pointing left to Avatar */}
+                          <div
+                            className="absolute -left-1.5 top-3 w-2.5 h-2.5 bg-[#0E122B] border-l-2 border-b-2 transform rotate-45 z-10"
+                            style={{ borderColor: theme.hex }}
+                          />
+
+                          <div className={`bg-[#0E122B]/95 border-2 ${theme.border} rounded-xl p-2.5 px-3.5 shadow-md transition-all relative z-0`}>
+                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                              <span className={`text-[11px] font-black font-handdrawn ${theme.text}`}>
+                                {m.sender}
+                              </span>
+                              <span className="text-[9px] font-handdrawn text-slate-400">
+                                {formatTime ? formatTime(m.timestamp) : '10:00 AM'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-white font-handdrawn leading-normal font-medium break-words whitespace-pre-wrap">
+                              {m.text}
+                            </p>
                           </div>
                         </div>
                       </div>
                     );
-                  }
-
-                  return (
-                    <div
-                      key={i}
-                      className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200 group relative z-10"
-                    >
-                      {/* Avatar Circle with Sketched Theme Ring */}
-                      <div className="relative shrink-0 mt-0.5">
-                        <div
-                          className={`w-8 h-8 rounded-full bg-[#0D1026] border-2 ${theme.border} flex items-center justify-center shadow-md relative`}
-                        >
-                          <AvatarIcon avatar={m.avatar || 'ghost'} className="w-4 h-4 text-white" />
-                        </div>
-                      </div>
-
-                      {/* Hand-Drawn Sketch Speech Bubble */}
-                      <div className="flex-1 min-w-0 relative">
-                        {/* Pointer Tail pointing left to Avatar */}
-                        <div
-                          className="absolute -left-1.5 top-3 w-2.5 h-2.5 bg-[#0E122B] border-l-2 border-b-2 transform rotate-45 z-10"
-                          style={{ borderColor: theme.hex }}
-                        />
-
-                        <div className={`bg-[#0E122B]/95 border-2 ${theme.border} rounded-xl p-2.5 px-3.5 shadow-md transition-all relative z-0`}>
-                          <div className="flex items-center justify-between gap-2 mb-0.5">
-                            <span className={`text-[11px] font-black font-handdrawn ${theme.text}`}>
-                              {m.sender}
-                            </span>
-                            <span className="text-[9px] font-handdrawn text-slate-400">
-                              {formatTime ? formatTime(m.timestamp) : '10:00 AM'}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-white font-handdrawn leading-normal font-medium break-words whitespace-pre-wrap">
-                            {m.text}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={chatEndRef} />
-              </div>
+                  })}
+                  <div ref={chatEndRef} />
+                </div>
+              )}
             </div>
 
             {/* Scroll Indicator */}
             {showScrollIndicator && (
               <button
                 onClick={() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })}
-                className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 bg-[#8B5CF6] text-white px-3.5 py-1 rounded-full text-[11px] font-handdrawn font-bold shadow-xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-1.5 hover:bg-purple-600 transition-all active:scale-95 cursor-pointer"
+                className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 bg-[#8B5CF6] text-white px-3.5 py-1 rounded-full text-[11px] font-handdrawn font-bold shadow-xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-1.5 hover:bg-purple-600 hover:-translate-y-0.5 transition-all active:scale-95 cursor-pointer duration-200"
               >
                 <ChevronLeft className="w-3.5 h-3.5 rotate-[270deg]" /> NEW MESSAGES
               </button>
@@ -244,18 +260,25 @@ const ChatSidebar = ({
 
             {/* Emoji Quick Picker */}
             {showEmojiPicker && (
-              <div className="absolute bottom-16 left-4 z-40 bg-[#0E122B] border-2 border-purple-500/50 rounded-2xl p-2 shadow-2xl flex items-center gap-1 animate-in zoom-in-95 duration-150">
-                {EMOJIS.map((emoji, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => addEmoji(emoji)}
-                    className="w-7 h-7 flex items-center justify-center text-base hover:bg-white/10 rounded-xl transition-colors active:scale-90"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
+              <>
+                {/* Backdrop to close when clicking outside */}
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setShowEmojiPicker(false)}
+                />
+                <div className="absolute bottom-[60px] sm:bottom-[64px] left-2.5 right-2.5 sm:left-3 sm:right-3 z-40 bg-[#0E122B]/95 backdrop-blur-md border-2 border-purple-500/50 rounded-2xl p-1.5 sm:p-2 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(139,92,246,0.3)] flex items-center justify-between gap-0.5 sm:gap-1 animate-in zoom-in-95 fade-in duration-150">
+                  {EMOJIS.map((emoji, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => addEmoji(emoji)}
+                      className="w-7 h-7 sm:w-8 sm:h-8 flex-1 max-w-[32px] rounded-lg hover:bg-white/10 flex items-center justify-center text-sm transition-all hover:scale-125 active:scale-95 cursor-pointer duration-150 shrink-0"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
 
             {/* Bottom Input Area - Full Width & Responsive Bounds */}
@@ -265,25 +288,25 @@ const ChatSidebar = ({
                 <button
                   type="button"
                   onClick={() => setShowEmojiPicker(prev => !prev)}
-                  className="w-8 h-8 rounded-full bg-[#0D1026] border-2 border-amber-400 text-amber-400 hover:scale-105 flex items-center justify-center transition-all cursor-pointer shrink-0 active:scale-95 shadow-sm"
+                  className="w-8 h-8 rounded-full bg-[#0D1026] border-2 border-amber-400 text-amber-400 hover:scale-105 hover:-translate-y-0.5 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0 active:scale-95 shadow-sm"
                   title="Emoji"
                 >
                   <Smile className="w-4 h-4 text-amber-400" />
                 </button>
 
-                {/* Input Box */}
+                {/* Input Box with soft focus glow */}
                 <input
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Say something fun..."
-                  className="flex-1 min-w-0 bg-[#0D1026] border-2 border-slate-700 focus:border-purple-400 rounded-full py-2 px-3.5 text-xs font-handdrawn text-white placeholder:text-slate-500 outline-none transition-all"
+                  className="flex-1 min-w-0 bg-[#0D1026] border-2 border-slate-700 focus:border-purple-400 focus:shadow-[0_0_12px_rgba(139,92,246,0.35)] rounded-full py-2 px-3.5 text-xs font-handdrawn text-white placeholder:text-slate-500 outline-none transition-all duration-200"
                 />
 
-                {/* Send Button */}
+                {/* Send Button with micro-lift and glow */}
                 <button
                   type="submit"
-                  className="w-9 h-9 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-full flex items-center justify-center shadow-[0_0_12px_rgba(139,92,246,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+                  className="w-9 h-9 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-full flex items-center justify-center shadow-[0_0_12px_rgba(139,92,246,0.5)] hover:shadow-[0_0_18px_rgba(139,92,246,0.7)] hover:scale-105 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
                   title="Send"
                 >
                   <Send className="w-3.5 h-3.5 text-white transform rotate-12 -translate-y-0.5 translate-x-0.5" />
@@ -318,11 +341,10 @@ const ChatSidebar = ({
                 return (
                   <div key={i} className="flex flex-col">
                     <div
-                      className={`group flex items-center justify-between p-2.5 rounded-xl border-2 transition-all ${
-                        isMe
+                      className={`group flex items-center justify-between p-2.5 rounded-xl border-2 transition-all ${isMe
                           ? 'bg-[#121633] border-purple-500/50 shadow-md'
                           : 'bg-[#0D1026] border-[#242C54] hover:border-slate-600'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div className="relative">
@@ -377,18 +399,6 @@ const ChatSidebar = ({
                   </div>
                 );
               })
-            )}
-
-            {role === 'HOST' && (
-              <div className="pt-2">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="w-full py-2.5 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-xl text-xs font-bold font-handdrawn uppercase tracking-widest transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Settings className="w-4 h-4" />
-                  CHANGE VIDEO
-                </button>
-              </div>
             )}
           </div>
         )}

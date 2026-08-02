@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Copy, Check, Link, RefreshCw, LogOut,
+  Copy, Check, Link, RefreshCw, LogOut, Video,
   Ghost, Cat, Dog, Bot, Smile, Sparkles, ChevronLeft
 } from 'lucide-react';
 
@@ -29,12 +29,13 @@ const Navbar = ({
   copyRoomLink,
   handleManualSync,
   handleLeaveRoom,
+  onOpenChangeVideo,
   copied = false
 }) => {
   const navigate = useNavigate();
 
   return (
-    <nav className="w-full bg-[#070914] border-b-2 border-[#1E2442] px-4 sm:px-6 py-2.5 flex items-center justify-between z-40 select-none relative font-handdrawn">
+    <nav className="w-full bg-transparent px-4 sm:px-6 py-2.5 flex items-center justify-between z-40 select-none relative font-handdrawn">
       {/* Left Section: Hand-Drawn Logo & Title */}
       <div className="flex items-center gap-3">
         <button
@@ -98,7 +99,7 @@ const Navbar = ({
         {/* Purple Sticky Note Pill for Room ID */}
         <div
           onClick={copyRoomId}
-          className="bg-[#8B5CF6] border-2 border-slate-900 rounded-xl px-3.5 py-1.5 flex items-center gap-2.5 cursor-pointer shadow-[2px_3px_0px_rgba(0,0,0,0.8)] rotate-[-1deg] animate-room-wiggle hover:bg-[#7C3AED] transition-all active:scale-95"
+          className="bg-[#8B5CF6] border-2 border-slate-900 rounded-xl px-3.5 py-1.5 flex items-center gap-2.5 cursor-pointer shadow-[2px_3px_0px_rgba(0,0,0,0.8)] rotate-[-1deg] animate-room-wiggle hover:bg-[#7C3AED] hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(139,92,246,0.4)] transition-all duration-200 active:scale-95"
           title="Click to copy Room ID"
         >
           <div className="flex flex-col">
@@ -122,7 +123,7 @@ const Navbar = ({
         {/* White Paper Sticker Pill for Copy Link */}
         <button
           onClick={copyRoomLink}
-          className="bg-white text-slate-950 border-2 border-slate-950 rounded-2xl px-3.5 py-1.5 flex items-center gap-2 text-xs font-black font-handdrawn shadow-[2px_3px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
+          className="bg-white text-slate-950 border-2 border-slate-950 rounded-2xl px-3.5 py-1.5 flex items-center gap-2 text-xs font-black font-handdrawn shadow-[2px_3px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] active:scale-95 transition-all duration-200 cursor-pointer"
         >
           {/* Clipboard doodle icon */}
           <svg className="w-4 h-4 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -146,6 +147,18 @@ const Navbar = ({
             <RefreshCw className={`w-3.5 h-3.5 ${syncStatus !== 'Synced' ? 'animate-spin text-amber-400' : ''}`} />
           </button>
         </div>
+
+        {/* Host Only: Change Video Pill - Separated Host Content Action */}
+        {role === 'HOST' && (
+          <button
+            onClick={onOpenChangeVideo}
+            className="ml-4 sm:ml-5 bg-[#0A1026] text-cyan-400 hover:text-cyan-300 border-2 border-cyan-500/70 hover:border-cyan-400 rounded-[18px] px-3 py-1.5 flex items-center gap-2 text-xs font-black font-handdrawn uppercase tracking-wider shadow-[2px_3px_0px_rgba(0,0,0,0.9)] hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] active:scale-95 transition-all duration-200 cursor-pointer"
+            title="Change Video"
+          >
+            <Video className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span>CHANGE VIDEO</span>
+          </button>
+        )}
       </div>
 
       {/* Right Section: Avatar & Leave Action */}
@@ -185,7 +198,7 @@ const Navbar = ({
 
           <button
             onClick={handleLeaveRoom}
-            className="bg-[#1C0D17] border-2 border-[#EC4899] text-[#F472B6] hover:bg-[#EC4899]/20 shadow-[0_0_12px_rgba(236,72,153,0.3)] rounded-[14px] px-3.5 py-1.5 text-xs font-black font-handdrawn transition-all flex items-center gap-1.5 animate-btn-shake active:scale-95 cursor-pointer"
+            className="bg-[#1C0D17] border-2 border-[#EC4899] text-[#F472B6] hover:bg-[#EC4899]/20 shadow-[0_0_12px_rgba(236,72,153,0.3)] hover:shadow-[0_0_16px_rgba(236,72,153,0.5)] hover:-translate-y-0.5 rounded-[14px] px-3.5 py-1.5 text-xs font-black font-handdrawn transition-all duration-200 flex items-center gap-1.5 animate-btn-shake active:scale-95 cursor-pointer"
             title="Leave Room"
           >
             <LogOut className="w-3.5 h-3.5 text-[#F472B6] shrink-0" />
@@ -221,6 +234,17 @@ const Navbar = ({
           <span className="text-[10px] uppercase">{syncStatus}</span>
           <RefreshCw className={`w-3 h-3 text-[#10B981] ${syncStatus !== 'Synced' ? 'animate-spin' : ''}`} />
         </button>
+
+        {role === 'HOST' && (
+          <button
+            onClick={onOpenChangeVideo}
+            className="bg-[#0A1026] border-2 border-[#38BDF8] text-[#38BDF8] rounded-[16px] px-3 py-1 flex items-center gap-1.5 text-xs font-black font-handdrawn active:scale-95 transition-transform"
+            title="Change Video"
+          >
+            <Video className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <span className="text-[10px] uppercase">VIDEO</span>
+          </button>
+        )}
       </div>
     </nav>
   );

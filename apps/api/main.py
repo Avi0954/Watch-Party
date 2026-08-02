@@ -302,7 +302,7 @@ async def create_room(request: Request, room_data: RoomCreate = None):
     manager.room_users[room_id] = {}
     manager.room_messages[room_id] = []
     manager.room_states[room_id] = {
-        "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+        "url": "https://youtu.be/wBw9EPtDLw8?si=_UhB7wTCxQJ-frYk",
         "isPlaying": False,
         "baseTime": 0,
         "startTimestamp": int(time.time() * 1000)
