@@ -175,10 +175,11 @@ const ChatSidebar = ({
               ) : (
                 <div className="min-h-full flex flex-col justify-end space-y-2.5">
                   {messages.map((m, i) => {
+                    const isMe = username && m.sender === username;
                     const isSystem = m.sender === 'System';
                     const theme = getSenderTheme(m.sender, i);
 
-                    {/* System Join / Announcement Note Banner */ }
+                    {/* System Join / Announcement Note Banner */}
                     if (isSystem) {
                       return (
                         <div key={i} className="flex justify-center py-1 animate-in fade-in duration-200">
@@ -207,29 +208,45 @@ const ChatSidebar = ({
                     return (
                       <div
                         key={i}
-                        className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200 group relative z-10 max-w-full"
+                        className={`flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200 group relative z-10 max-w-full ${
+                          isMe ? 'flex-row-reverse' : 'flex-row'
+                        }`}
                       >
                         {/* Avatar Circle with Sketched Theme Ring */}
                         <div className="relative shrink-0 mt-0.5">
                           <div
-                            className={`w-8 h-8 rounded-full bg-[#0D1026] border-2 ${theme.border} flex items-center justify-center shadow-md relative`}
+                            className={`w-8 h-8 rounded-full ${
+                              isMe ? 'bg-[#181133] border-2 border-[#8B5CF6] shadow-[0_0_10px_rgba(139,92,246,0.35)]' : `bg-[#0D1026] border-2 ${theme.border} shadow-md`
+                            } flex items-center justify-center relative`}
                           >
-                            <AvatarIcon avatar={m.avatar || 'ghost'} className="w-4 h-4 text-white" />
+                            <AvatarIcon avatar={m.avatar || (isMe ? selectedAvatar : 'ghost')} className="w-4 h-4 text-white" />
                           </div>
                         </div>
 
                         {/* Hand-Drawn Sketch Speech Bubble (Content-Sized Dynamic Width with Strict Wrap) */}
                         <div className="relative max-w-[calc(100%-2.5rem)] min-w-0">
-                          {/* Pointer Tail pointing left to Avatar */}
-                          <div
-                            className="absolute -left-1.5 top-3 w-2.5 h-2.5 bg-[#0E122B] border-l-2 border-b-2 transform rotate-45 z-10"
-                            style={{ borderColor: theme.hex }}
-                          />
+                          {/* Pointer Tail pointing to Avatar */}
+                          {isMe ? (
+                            <div
+                              className="absolute -right-1.5 top-3 w-2.5 h-2.5 bg-[#140E2B] border-r-2 border-t-2 border-[#8B5CF6] transform rotate-45 z-10"
+                            />
+                          ) : (
+                            <div
+                              className="absolute -left-1.5 top-3 w-2.5 h-2.5 bg-[#0E122B] border-l-2 border-b-2 transform rotate-45 z-10"
+                              style={{ borderColor: theme.hex }}
+                            />
+                          )}
 
-                          <div className={`w-fit max-w-full bg-[#0E122B]/95 border-2 ${theme.border} rounded-xl p-2 px-3 shadow-md transition-all relative z-0`}>
-                            <div className="flex items-center gap-2 mb-0.5 whitespace-nowrap">
-                              <span className={`text-[11px] font-black font-handdrawn ${theme.text}`}>
-                                {m.sender}
+                          <div
+                            className={`w-fit max-w-full rounded-xl p-2 px-3 shadow-md transition-all relative z-0 ${
+                              isMe
+                                ? 'bg-[#140E2B]/95 border-2 border-[#8B5CF6] shadow-[0_0_12px_rgba(139,92,246,0.25)] ml-auto'
+                                : `bg-[#0E122B]/95 border-2 ${theme.border}`
+                            }`}
+                          >
+                            <div className={`flex items-center gap-2 mb-0.5 whitespace-nowrap ${isMe ? 'justify-end' : 'justify-start'}`}>
+                              <span className={`text-[11px] font-black font-handdrawn ${isMe ? 'text-[#C084FC]' : theme.text}`}>
+                                {isMe ? 'You' : m.sender}
                               </span>
                               <span className="text-[9px] font-handdrawn text-slate-400">
                                 {formatTime ? formatTime(m.timestamp) : '10:00 AM'}
