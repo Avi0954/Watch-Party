@@ -59,6 +59,7 @@ const Room = () => {
   const [newUrlInput, setNewUrlInput] = useState('');
   const [activeTab, setActiveTab] = useState('chat');
   const [toasts, setToasts] = useState([]);
+  const toastTimers = useRef(new Map());
 
   const playerRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -132,13 +133,30 @@ const Room = () => {
     }
   }, [messages]);
 
-  // Toast helper
+  // Toast helper - newest on top, max 3, auto-dismiss 1.9s, hover pause support
   const showToast = (message) => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message }]);
-    setTimeout(() => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [{ id, message }, ...prev].slice(0, 3));
+    const timer = setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 2500);
+      toastTimers.current.delete(id);
+    }, 1900);
+    toastTimers.current.set(id, timer);
+  };
+
+  const handleToastMouseEnter = (id) => {
+    if (toastTimers.current.has(id)) {
+      clearTimeout(toastTimers.current.get(id));
+      toastTimers.current.delete(id);
+    }
+  };
+
+  const handleToastMouseLeave = (id) => {
+    const timer = setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+      toastTimers.current.delete(id);
+    }, 1200);
+    toastTimers.current.set(id, timer);
   };
 
   // Monitor for joins
@@ -460,17 +478,19 @@ const Room = () => {
         </div>
       )}
 
-      {/* Modern Floating Toasts Container (Top-Right) */}
-      <div className="fixed top-6 right-4 sm:right-8 z-[120] flex flex-col gap-2.5 max-w-sm pointer-events-none">
+      {/* Compact Floating Toasts Container (Centered in Whitespace Between Leave Room & Chat Panel) */}
+      <div className="fixed top-24 sm:top-[48px] left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-10 md:right-12 lg:right-16 z-[120] flex flex-col gap-1.5 w-max max-w-[calc(100vw-2rem)] sm:max-w-xs pointer-events-none items-center sm:items-center">
         {toasts.map(t => (
           <div
             key={t.id}
-            className="bg-[#0C1024]/95 text-white font-handdrawn text-xs font-black px-4 py-2.5 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(139,92,246,0.3)] border-2 border-purple-500/40 flex items-center gap-2.5 animate-in slide-in-from-top-4 fade-in duration-200 backdrop-blur-md"
+            onMouseEnter={() => handleToastMouseEnter(t.id)}
+            onMouseLeave={() => handleToastMouseLeave(t.id)}
+            className="bg-[#0C1024]/95 text-white font-handdrawn text-[11px] sm:text-xs font-black px-2.5 sm:px-3 py-1.5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.7),0_0_12px_rgba(139,92,246,0.25)] border-2 border-purple-500/40 flex items-center gap-1.5 animate-in slide-in-from-top-1.5 fade-in duration-200 backdrop-blur-md pointer-events-auto"
           >
-            <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center shrink-0">
-              <Check className="w-3 h-3 text-emerald-400" />
+            <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center shrink-0">
+              <Check className="w-2.5 h-2.5 text-emerald-400" />
             </div>
-            <span className="leading-snug">{t.message}</span>
+            <span className="leading-none pr-0.5">{t.message}</span>
           </div>
         ))}
       </div>
