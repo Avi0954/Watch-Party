@@ -355,9 +355,9 @@ const Room = () => {
         />
       </header>
 
-      <main className="flex-1 flex flex-col md:flex-row max-w-[1400px] 2xl:max-w-[1500px] mx-auto w-full px-2 md:px-4 lg:px-5 py-1.5 md:py-4 gap-2 md:gap-4 lg:gap-5 items-start md:items-stretch overflow-hidden md:max-h-[85dvh]">
+      <main className="flex-1 flex flex-col xl:flex-row max-w-[1400px] 2xl:max-w-[1500px] mx-auto w-full px-2 pl-[max(0.5rem,env(safe-area-inset-left,0px))] pr-[max(0.5rem,env(safe-area-inset-right,0px))] sm:px-4 xl:px-5 py-1.5 sm:py-3 xl:py-4 gap-2 sm:gap-3 xl:gap-5 items-start xl:items-stretch overflow-hidden xl:max-h-[85dvh]">
         {/* Video Section - Outer Player Container with Sketch Corners */}
-        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} md:aspect-auto md:flex-1 bg-[#0A0D1E] relative overflow-hidden group rounded-[24px] border border-white/15 ring-1 ring-inset ring-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_25px_rgba(139,92,246,0.12)] shrink-0 transition-all duration-500 ease-in-out`}>
+        <div className={`w-full ${isKeyboardOpen ? 'h-32' : 'aspect-video'} xl:aspect-auto xl:flex-1 bg-[#0A0D1E] relative overflow-hidden group rounded-[24px] border border-white/15 ring-1 ring-inset ring-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_25px_rgba(139,92,246,0.12)] shrink-0 transition-all duration-500 ease-in-out`}>
           {/* Sketch doodle corners */}
           <svg className="absolute top-2 left-2 z-10 w-5 h-5 text-amber-400 opacity-80 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
@@ -479,7 +479,7 @@ const Room = () => {
       )}
 
       {/* Compact Floating Toasts Container (Centered in Whitespace Between Leave Room & Chat Panel) */}
-      <div className="fixed top-24 sm:top-[48px] left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-10 md:right-12 lg:right-16 z-[120] flex flex-col gap-1.5 w-max max-w-[calc(100vw-2rem)] sm:max-w-xs pointer-events-none items-center sm:items-center">
+      <div className="fixed top-16 md:top-[48px] left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-12 lg:right-16 z-[120] flex flex-col gap-1.5 w-max max-w-[calc(100vw-2rem)] sm:max-w-xs pointer-events-none items-center md:items-center">
         {toasts.map(t => (
           <div
             key={t.id}

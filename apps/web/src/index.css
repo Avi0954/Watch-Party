@@ -4,10 +4,29 @@
   background-color: #070B17;
   color: white;
   font-family: 'Shantell Sans', 'Comic Neue', 'Gaegu', 'Caveat', cursive, sans-serif;
+  
+  /* Safe Area Inset Variables with 0px fallback */
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* Progressive Apple & Mobile Enhancements */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   font-family: 'Shantell Sans', 'Comic Neue', 'Gaegu', 'Caveat', cursive, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
 }
 
 .font-inter {
@@ -22,10 +41,24 @@ body {
   font-family: 'Shantell Sans', 'Comic Neue', 'Gaegu', 'Caveat', cursive, sans-serif;
 }
 
+/* iOS Safari: Prevent unwanted auto-zoom on focus while preserving exact appearance */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    input[type="text"],
+    input[type="url"],
+    input[type="password"],
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+}
+
 @layer utilities {
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    -webkit-overflow-scrolling: touch;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -43,6 +76,20 @@ body {
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Safe area helper utilities */
+  .pt-safe {
+    padding-top: max(0.25rem, env(safe-area-inset-top, 0px));
+  }
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
+  .pl-safe {
+    padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+  }
+  .pr-safe {
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
   }
 }
 

@@ -66,7 +66,7 @@ const ChatSidebar = ({
   };
 
   return (
-    <div className="w-full md:w-[340px] lg:w-[380px] flex-1 md:flex-none flex flex-col bg-[#070914] rounded-[24px] shadow-2xl overflow-hidden relative select-none font-handdrawn transition-all duration-300">
+    <div className="w-full xl:w-[380px] 2xl:w-[420px] flex-1 xl:flex-none flex flex-col bg-[#070914] rounded-[24px] shadow-2xl overflow-hidden relative select-none font-handdrawn transition-all duration-300 min-h-0">
 
       {/* Outer Sketched Frame Accent SVG (Doodle Frame) */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-30 opacity-40" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -207,7 +207,7 @@ const ChatSidebar = ({
                     return (
                       <div
                         key={i}
-                        className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200 group relative z-10"
+                        className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200 group relative z-10 max-w-full"
                       >
                         {/* Avatar Circle with Sketched Theme Ring */}
                         <div className="relative shrink-0 mt-0.5">
@@ -218,16 +218,16 @@ const ChatSidebar = ({
                           </div>
                         </div>
 
-                        {/* Hand-Drawn Sketch Speech Bubble */}
-                        <div className="flex-1 min-w-0 relative">
+                        {/* Hand-Drawn Sketch Speech Bubble (Content-Sized Dynamic Width with Strict Wrap) */}
+                        <div className="relative max-w-[calc(100%-2.5rem)] min-w-0">
                           {/* Pointer Tail pointing left to Avatar */}
                           <div
                             className="absolute -left-1.5 top-3 w-2.5 h-2.5 bg-[#0E122B] border-l-2 border-b-2 transform rotate-45 z-10"
                             style={{ borderColor: theme.hex }}
                           />
 
-                          <div className={`bg-[#0E122B]/95 border-2 ${theme.border} rounded-xl p-2.5 px-3.5 shadow-md transition-all relative z-0`}>
-                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                          <div className={`w-fit max-w-full bg-[#0E122B]/95 border-2 ${theme.border} rounded-xl p-2 px-3 shadow-md transition-all relative z-0`}>
+                            <div className="flex items-center gap-2 mb-0.5 whitespace-nowrap">
                               <span className={`text-[11px] font-black font-handdrawn ${theme.text}`}>
                                 {m.sender}
                               </span>
@@ -235,7 +235,7 @@ const ChatSidebar = ({
                                 {formatTime ? formatTime(m.timestamp) : '10:00 AM'}
                               </span>
                             </div>
-                            <p className="text-[11px] text-white font-handdrawn leading-normal font-medium break-words whitespace-pre-wrap">
+                            <p className="text-[11px] text-white font-handdrawn leading-normal font-medium break-all [overflow-wrap:anywhere] whitespace-pre-wrap">
                               {m.text}
                             </p>
                           </div>
@@ -281,8 +281,8 @@ const ChatSidebar = ({
               </>
             )}
 
-            {/* Bottom Input Area - Full Width & Responsive Bounds */}
-            <div className="p-2.5 sm:p-3 border-t border-slate-800/80 bg-[#070914] relative z-20 shrink-0 w-full overflow-hidden">
+            {/* Bottom Input Area - Full Width & Responsive Bounds with Safe Area Home Indicator Support */}
+            <div className="p-2.5 sm:p-3 pb-[max(0.625rem,calc(env(safe-area-inset-bottom,0px)+0.35rem))] md:pb-3 border-t border-slate-800/80 bg-[#070914] relative z-20 shrink-0 w-full overflow-hidden">
               <form onSubmit={sendChatMessage} className="flex items-center gap-2 w-full min-w-0">
                 {/* Yellow Emoji Button */}
                 <button
